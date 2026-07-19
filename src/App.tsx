@@ -6,7 +6,6 @@ import eyeMakeup from "./assets/hero/eye-makeup.mp4";
 import eyeMakeupMenu from "./assets/hero/eye-makeup0.mp4";
 import DustCanvas from "./components/DustCanvas";
 import ContactBlock from "./components/ContactBlock";
-import ParticleCanvas from "./components/ParticleSystem";
 import ParticleMenuItem from "./components/ParticleMenuItem";
 import PenNameReveal from "./components/PenNameReveal";
 import Preloader from "./components/ui/Preloader";
@@ -494,19 +493,14 @@ function Navigation() {
         gsap.set(overlayRef.current, { opacity: 0 });
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
         tl.to(overlayRef.current, { opacity: 1, duration: 0.35 })
-          .from(navRef.current?.children ?? [], {
-            y: 30,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 0.8,
-            delay: 0.3,
-          }, '<')
-          .from(dividerRefs.current.filter(Boolean), {
-            scaleX: 0,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 0.2,
-          }, '-=0.6');
+          .fromTo(navRef.current?.children ?? [],
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, stagger: 0.1, duration: 0.8, delay: 0.3, clearProps: 'opacity,transform' }
+          , '<')
+          .fromTo(dividerRefs.current.filter(Boolean),
+            { scaleX: 0, opacity: 0 },
+            { scaleX: 1, opacity: 1, stagger: 0.1, duration: 0.2 }
+          , '-=0.6');
       } else {
         // НЕ анимируем детей navRef (это <a>, внутри — ParticleMenuItem).
         // Dust-рассыпание букв при закрытии делает сам ParticleMenuItem.
@@ -520,7 +514,13 @@ function Navigation() {
     }, overlayRef);
     // ВАЖНО: НЕ ctx.revert() — он мгновенно сбрасывал opacity к 0,
     // убивая анимацию закрытия. kill() убивает таймлайны, но не откатывает стили.
-    return () => ctx.kill();
+    return () => {
+      // Защита: если timeline прерывается (kill) до завершения,
+      // пункты меню не должны оставаться невидимыми (opacity:0 от gsap.fromTo)
+      gsap.set(navRef.current?.children ?? [], { opacity: 1, y: 0, clearProps: 'opacity,transform' });
+      gsap.set(dividerRefs.current.filter(Boolean), { opacity: 1, scaleX: 1, clearProps: 'opacity,transform' });
+      ctx.kill();
+    };
   }, [menuOpen]);
 
   const navLinks = [
@@ -585,7 +585,7 @@ function Navigation() {
               aria-label={menuOpen ? "Закрыть" : "Меню"}
               aria-expanded={menuOpen}
             >
-              <div className="relative w-9 h-[26px]">
+              <div className="burger-box relative w-9 h-[26px]">
                 <span
                   className="burger-bar burger-bar-1 absolute left-0 w-9 bg-white origin-center"
                   style={{ height: '2px', top: 0 }}
@@ -671,30 +671,9 @@ function Navigation() {
           className="absolute inset-0"
           style={{ zIndex: 10, background: 'rgba(0,0,0,0.38)' }}
           onClick={closeMenu}
-        >
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-              backgroundSize: '256px 256px',
-            }}
-          />
-        </div>
+        />
 
         <div className="menu-glass-layer absolute inset-0" style={{ zIndex: 20 }} />
-
-        <div className="absolute inset-0" style={{ zIndex: 30 }}>
-          <ParticleCanvas
-            active={menuOpen}
-            mode="burst"
-            width={viewport.w}
-            height={viewport.h}
-            originX={0.85}
-            originY={0.06}
-          />
-        </div>
-
-        <div className="menu-prism-scan absolute inset-0 pointer-events-none" style={{ zIndex: 40 }} />
 
         <div className="absolute inset-0 flex flex-col px-5" style={{ zIndex: 50 }}>
           <div className="flex-1 flex flex-col items-center justify-center">

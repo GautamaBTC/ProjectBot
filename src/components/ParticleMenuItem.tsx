@@ -32,6 +32,9 @@ export default function ParticleMenuItem({ label, anim, idx, menuOpen, active = 
   const [glowActive, setGlowActive] = useState(false);
   const config = animConfig[anim];
 
+  // Порядковый номер пункта: 01, 02, 03…
+  const numLabel = String(idx + 1).padStart(2, "0");
+
   // Generate stable random offsets for dust scatter per character
   const dustOffsets = useMemo(() => chars.map(() => ({
     x: (Math.random() - 0.5) * 80,
@@ -77,53 +80,87 @@ export default function ParticleMenuItem({ label, anim, idx, menuOpen, active = 
 
   return (
     <span
-      className={`menu-item text-xl tracking-[0.18em] leading-none no-underline uppercase ${active ? 'text-[#d4af37]' : 'text-white'}`}
+      className={`menu-item-row ${active ? "menu-item-active" : ""}`}
       style={{
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 200,
-        paddingTop: '1.5rem',
-        paddingBottom: '1.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '56px',
-        userSelect: 'none',
-        WebkitTapHighlightColor: 'transparent',
-        WebkitTouchCallout: 'none',
-        textShadow: glowActive ? '0 0 12px rgba(201,185,154,0.6), 0 0 24px rgba(201,185,154,0.3)' : 'none',
-        transition: 'text-shadow 0.13s ease, color 0.3s ease',
+        display: "flex",
+        alignItems: "baseline",
+        justifyContent: "center",
+        gap: "0.9rem",
+        paddingTop: "1.6rem",
+        paddingBottom: "1.6rem",
+        minHeight: "56px",
+        userSelect: "none",
+        WebkitTapHighlightColor: "transparent",
+        WebkitTouchCallout: "none",
+        transition: "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
       }}
     >
-      {chars.map((char, i) => {
-        const revealed = revealedChars[i];
-        const settled = settledChars[i];
-        const offset = dustOffsets[i];
-        return (
-          <span
-            key={i}
-            className="menu-item-dust-char"
-            style={{
-              display: 'inline-block',
-              opacity: revealed ? 1 : 0,
-              transform: settled
-                ? 'translate(0, 0) scale(1)'
-                : revealed
-                  ? `translate(${offset.x * 0.3}px, ${offset.y * 0.3}px) scale(0.95)`
-                  : `translate(${offset.x}px, ${offset.y}px) scale(0.7)`,
-              filter: settled
-                ? 'blur(0px)'
-                : revealed
-                  ? `blur(${offset.blur * 0.4}px)`
-                  : `blur(${offset.blur}px)`,
-              transition: settled
-                ? 'opacity 0.2s ease, transform 0.23s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s ease'
-                : 'opacity 0.13s ease, transform 0.13s ease, filter 0.13s ease',
-            }}
-          >
-            {char === ' ' ? '\u00A0' : char}
-          </span>
-        );
-      })}
+      {/* Порядковый номер 01–05 */}
+      <span
+        className="menu-item-num"
+        style={{
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 400,
+          fontSize: "0.7rem",
+          letterSpacing: "0.15em",
+          color: "#d4af37",
+          opacity: active ? 0.9 : 0.45,
+          transition: "opacity 0.3s ease",
+          minWidth: "1.6em",
+          textAlign: "right",
+        }}
+      >
+        {numLabel}
+      </span>
+
+      {/* Название пункта — serif Playfair */}
+      <span
+        className={`menu-item ${active ? "text-[#d4af37]" : "text-white"}`}
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontWeight: 400,
+          fontSize: "clamp(1.9rem, 7vw, 2.6rem)",
+          letterSpacing: "0.015em",
+          lineHeight: 1,
+          display: "flex",
+          alignItems: "center",
+          textShadow: glowActive
+            ? "0 0 14px rgba(201,185,154,0.55), 0 0 28px rgba(201,185,154,0.28), 0 2px 10px rgba(0,0,0,0.55)"
+            : "0 2px 10px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.7)",
+          transition: "text-shadow 0.13s ease, color 0.3s ease",
+        }}
+      >
+        {chars.map((char, i) => {
+          const revealed = revealedChars[i];
+          const settled = settledChars[i];
+          const offset = dustOffsets[i];
+          return (
+            <span
+              key={i}
+              className="menu-item-dust-char"
+              style={{
+                display: "inline-block",
+                opacity: revealed ? 1 : 0,
+                transform: settled
+                  ? "translate(0, 0) scale(1)"
+                  : revealed
+                    ? `translate(${offset.x * 0.3}px, ${offset.y * 0.3}px) scale(0.95)`
+                    : `translate(${offset.x}px, ${offset.y}px) scale(0.7)`,
+                filter: settled
+                  ? "blur(0px)"
+                  : revealed
+                    ? `blur(${offset.blur * 0.4}px)`
+                    : `blur(${offset.blur}px)`,
+                transition: settled
+                  ? "opacity 0.2s ease, transform 0.23s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s ease"
+                  : "opacity 0.13s ease, transform 0.13s ease, filter 0.13s ease",
+              }}
+            >
+              {char === " " ? "\u00A0" : char}
+            </span>
+          );
+        })}
+      </span>
     </span>
   );
 }

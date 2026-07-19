@@ -727,35 +727,43 @@ body.no-scroll {
   }
 }
 
-/* ===== MENU BURGER BARS ===== */
-.burger-bar {
-  height: 2px !important;
-  min-height: 2px !important;
-  max-height: 2px !important;
-  width: 2.25rem !important;
-  min-width: 2.25rem !important;
-  display: block;
-  transition: top 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
-              transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
-              opacity 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+/* ===== MENU BURGER BARS — Collapse (hamburgers.io) ===== */
+.burger-box {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center;
 }
 
-/* Menu open state — animated via inline styles since Framer Motion
-   controls menuOpen state but CSS transitions handle the icon transform.
-   We use a data-attribute approach: parent button gets [aria-expanded="true"]. */
+.burger-bar {
+  height: 2px;
+  width: 2.25rem;
+  display: block;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 0 solid transparent;
+  border-radius: 0;
+  /* Collapse: полоски съезжаются к центру и растворяются */
+  transition:
+    top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease,
+    background 0.4s ease,
+    box-shadow 0.4s ease;
+  will-change: transform, top, opacity;
+}
 
-/* Burger bars when menu is open (parent has aria-expanded="true") */
+/* Collapse — меню открыто: верх/низ съезжают к центру и гаснут, остаётся черта */
 [aria-expanded="true"] .burger-bar-1 {
   top: 12.5px !important;
-  transform: rotate(45deg);
+  opacity: 0;
 }
 [aria-expanded="true"] .burger-bar-2 {
-  opacity: 0;
-  transform: scaleX(0);
+  top: 12.5px !important;
+  background: rgba(212, 175, 55, 0.9) !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
 }
 [aria-expanded="true"] .burger-bar-3 {
   top: 12.5px !important;
-  transform: rotate(-45deg);
+  opacity: 0;
 }
 
 /* ===== MENU ITEM TEXT ===== */
@@ -764,6 +772,40 @@ body.no-scroll {
     0 2px 8px rgba(0, 0, 0, 0.6),
     0 1px 2px rgba(0, 0, 0, 0.8);
   position: relative;
+}
+
+/* Элегантная строка пункта: номер + serif-название, сдвиг при active/hover */
+.menu-item-row {
+  position: relative;
+  transform: translateX(0);
+}
+/* Золотая точка-маркер перед активным пунктом */
+.menu-item-row::before {
+  content: '';
+  position: absolute;
+  left: -1.4rem;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+  transform: translateY(-50%) scale(0);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.menu-item-active.menu-item-row::before {
+  transform: translateY(-50%) scale(1);
+}
+.menu-item-active.menu-item-row {
+  transform: translateX(10px);
+}
+/* Hover/tap на десктопе и тач — мягкий сдвиг вправо */
+a:hover .menu-item-row,
+a:active .menu-item-row {
+  transform: translateX(8px);
+}
+a:hover .menu-item-row .menu-item-num {
+  opacity: 0.9;
 }
 
 /* Dust reassemble: scattered shadow particles that converge into letter */
