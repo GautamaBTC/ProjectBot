@@ -159,11 +159,11 @@ export default function Footer() {
                   aria-label={label}
                   className="transition-all duration-300 hover:-translate-y-0.5"
                   style={{
-                    color: 'rgba(255,255,255,0.55)',
+                    color: gold,
                     display: 'inline-flex',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = gold)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#f5e2a0')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = gold)}
                 >
                   <BrandIcon svg={icon.svg} size={24} />
                 </a>
