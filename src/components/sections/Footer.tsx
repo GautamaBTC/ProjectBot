@@ -27,13 +27,19 @@ const SOCIALS = [
 
 const gold = '#d4af37';
 
-// Рендер brand-SVG (simple-icons) с нужным цветом
+// Рендер brand-SVG (simple-icons) с нужным цветом.
+// simple-icons не ставит fill — по умолчанию путь чёрный.
+// Явно задаём fill="currentColor", чтобы наследовать color от <a>.
 function BrandIcon({ svg, size = 22 }: { svg: string; size?: number }) {
+  const colored = svg
+    .replace(/width="[^"]*"/, '')
+    .replace(/height="[^"]*"/, '')
+    .replace(/<svg /, '<svg fill="currentColor" ');
   return (
     <span
       aria-hidden
       style={{ width: size, height: size, display: 'inline-flex', color: 'currentColor' }}
-      dangerouslySetInnerHTML={{ __html: svg.replace(/width="[^"]*"/, '').replace(/height="[^"]*"/, '') }}
+      dangerouslySetInnerHTML={{ __html: colored }}
     />
   );
 }
