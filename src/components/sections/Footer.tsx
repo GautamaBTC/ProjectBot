@@ -1,5 +1,9 @@
 import Divider from '../ui/Divider';
 import { CONTACTS } from '../../lib/constants';
+import ScrollDirectionReveal from '../ScrollDirectionReveal';
+
+// Brand-иконки (премиальные, ровные контуры) — simple-icons
+import { siWhatsapp, siTelegram, siInstagram } from 'simple-icons';
 
 const NAV_LINKS = [
   { label: 'Услуги', href: '#services' },
@@ -14,140 +18,179 @@ const LEGAL_LINKS = [
   { label: 'Согласие на обработку данных', href: '/consent.html' },
 ];
 
-// Кастомные SVG-иконки в едином outline-стиле (как в Contact, план 9.3)
-const IconWhatsApp = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 21l1.65-4.5A8 8 0 1 1 12 20a8 8 0 0 1-3.5-.8L3 21z" />
-    <path d="M9 9c0 3 3 6 6 6 .5 0 .9-.1 1.3-.3" />
-  </svg>
-);
-
-const IconTelegram = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 4L3 11l6 2 2 6 3-4 5 3z" />
-    <path d="M9 13l8-8" />
-  </svg>
-);
-
-const IconInstagram = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="5" />
-    <circle cx="12" cy="12" r="4" />
-    <circle cx="17" cy="7" r="1" fill="currentColor" stroke="none" />
-  </svg>
-);
-
+// Точные brand-иконки (без кружков-рамок). Цвет задаётся через currentColor.
 const SOCIALS = [
-  { key: 'whatsapp', label: 'WhatsApp', href: `https://wa.me/${CONTACTS.whatsapp}`, Icon: IconWhatsApp },
-  { key: 'telegram', label: 'Telegram', href: 'https://t.me/inna_egorushkina', Icon: IconTelegram },
-  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/inna.egorushkina', Icon: IconInstagram },
+  { key: 'whatsapp', label: 'WhatsApp', href: `https://wa.me/${CONTACTS.whatsapp}`, icon: siWhatsapp },
+  { key: 'telegram', label: 'Telegram', href: 'https://t.me/inna_egorushkina', icon: siTelegram },
+  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/inna.egorushkina', icon: siInstagram },
 ];
+
+const gold = '#d4af37';
+
+// Рендер brand-SVG (simple-icons) с нужным цветом
+function BrandIcon({ svg, size = 22 }: { svg: string; size?: number }) {
+  return (
+    <span
+      aria-hidden
+      style={{ width: size, height: size, display: 'inline-flex', color: 'currentColor' }}
+      dangerouslySetInnerHTML={{ __html: svg.replace(/width="[^"]*"/, '').replace(/height="[^"]*"/, '') }}
+    />
+  );
+}
 
 export default function Footer() {
   return (
-    <footer
-      className="relative mt-16 pt-16 pb-10 px-5 md:px-8"
-      style={{
-        borderTop: '1px solid rgba(212,175,55,0.15)',
-        paddingBottom: 'max(3rem, env(safe-area-inset-bottom))',
-      }}
-    >
-      <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
-        {/* Decorative logo (план 9.1) */}
-        <div className="text-center">
-          <h2
-            style={{
-              fontFamily: "'League Spartan', sans-serif",
-              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-              fontWeight: 600,
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              background: 'linear-gradient(90deg, #d4af37, #f5e2a0, #d4af37)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              marginBottom: 6,
-            }}
-          >
-            ВЗГЛЯД
-          </h2>
-          {/* Золотая орнаментальная линия */}
-          <div
-            className="mx-auto"
-            style={{
-              width: '60%',
-              height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.7), transparent)',
-            }}
-          />
-          <p
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '0.7rem',
-              color: 'rgba(255,255,255,0.5)',
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              marginTop: 8,
-            }}
-          >
-            эстетика лица
-          </p>
-        </div>
+    <ScrollDirectionReveal y={28} duration={0.7}>
+      <footer
+        className="relative mt-16 pt-16 px-5 md:px-8"
+        style={{
+          borderTop: '1px solid rgba(212,175,55,0.15)',
+          paddingBottom: 'max(3rem, env(safe-area-inset-bottom))',
+        }}
+      >
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
+          {/* Колонка 1 — лого + контакты */}
+          <div className="flex flex-col items-center md:items-start gap-5 text-center md:text-left">
+            <div>
+              <h2
+                style={{
+                  fontFamily: "'League Spartan', sans-serif",
+                  fontSize: 'clamp(1.8rem, 4vw, 2.4rem)',
+                  fontWeight: 600,
+                  letterSpacing: '0.3em',
+                  textTransform: 'uppercase',
+                  background: 'linear-gradient(90deg, #d4af37, #f5e2a0, #d4af37)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  marginBottom: 6,
+                }}
+              >
+                ВЗГЛЯД
+              </h2>
+              <p
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '0.7rem',
+                  color: 'rgba(255,255,255,0.5)',
+                  letterSpacing: '0.3em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                эстетика лица
+              </p>
+            </div>
 
-        {/* Navigation links */}
-        <nav className="flex flex-wrap justify-center gap-x-6 gap-y-3">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="transition-colors duration-300 hover:text-[#d4af37]"
+            <div className="flex flex-col gap-2.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <a
+                href={`tel:${CONTACTS.phone}`}
+                className="transition-colors duration-300 hover:text-[#d4af37]"
+                style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', textDecoration: 'none', letterSpacing: '0.02em' }}
+              >
+                {CONTACTS.phoneDisplay}
+              </a>
+              <a
+                href={CONTACTS.routeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors duration-300 hover:text-[#d4af37]"
+                style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', lineHeight: 1.5 }}
+              >
+                {CONTACTS.address}
+              </a>
+              <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.5 }}>
+                {CONTACTS.hours}
+              </p>
+            </div>
+          </div>
+
+          {/* Колонка 2 — навигация */}
+          <nav className="flex flex-col items-center md:items-start gap-3">
+            <span
               style={{
                 fontFamily: "'Inter', sans-serif",
-                fontSize: '0.75rem',
-                color: 'rgba(255,255,255,0.5)',
-                letterSpacing: '0.15em',
+                fontSize: '0.65rem',
+                color: 'rgba(212,175,55,0.7)',
+                letterSpacing: '0.25em',
                 textTransform: 'uppercase',
-                fontWeight: 400,
-                textDecoration: 'none',
+                marginBottom: 4,
               }}
             >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+              Навигация
+            </span>
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="transition-colors duration-300 hover:text-[#d4af37]"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '0.82rem',
+                  color: 'rgba(255,255,255,0.55)',
+                  letterSpacing: '0.04em',
+                  textDecoration: 'none',
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
 
-        {/* Social Icons — единый outline-стиль (план 9.3) */}
-        <div className="flex gap-4">
-          {SOCIALS.map(({ key, label, href, Icon }) => (
-            <a
-              key={key}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              className="transition-all duration-300 hover:-translate-y-0.5"
+          {/* Колонка 3 — соцсети + часы-примечание */}
+          <div className="flex flex-col items-center md:items-end gap-4 text-center md:text-right">
+            <span
               style={{
-                width: 42,
-                height: 42,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(212,175,55,0.3)',
-                background: 'rgba(212,175,55,0.05)',
-                color: '#d4af37',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '0.65rem',
+                color: 'rgba(212,175,55,0.7)',
+                letterSpacing: '0.25em',
+                textTransform: 'uppercase',
               }}
             >
-              <Icon size={20} />
-            </a>
-          ))}
+              Мы в соцсетях
+            </span>
+            <div className="flex gap-5">
+              {SOCIALS.map(({ key, label, href, icon }) => (
+                <a
+                  key={key}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="transition-all duration-300 hover:-translate-y-0.5"
+                  style={{
+                    color: 'rgba(255,255,255,0.55)',
+                    display: 'inline-flex',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = gold)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                >
+                  <BrandIcon svg={icon.svg} size={24} />
+                </a>
+              ))}
+            </div>
+            <p
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '0.72rem',
+                color: 'rgba(255,255,255,0.35)',
+                margin: 0,
+                lineHeight: 1.5,
+                maxWidth: '16rem',
+              }}
+            >
+              Запись на процедуры — в сообщениях.<br />Ответим в течение дня.
+            </p>
+          </div>
         </div>
 
-        <Divider />
+        <div className="max-w-6xl mx-auto mt-12">
+          <Divider />
+        </div>
 
-        {/* Legal + Copyright (план 9.2) */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        {/* Низ — legal + copyright */}
+        <div className="max-w-6xl mx-auto mt-6 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2">
             {LEGAL_LINKS.map((link) => (
               <a
                 key={link.href}
@@ -157,7 +200,7 @@ export default function Footer() {
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '0.7rem',
                   color: 'rgba(255,255,255,0.35)',
-                  letterSpacing: '0.05em',
+                  letterSpacing: '0.03em',
                   textDecoration: 'none',
                 }}
               >
@@ -166,18 +209,19 @@ export default function Footer() {
             ))}
           </div>
           <p
-            className="text-center"
+            className="text-center md:text-right"
             style={{
               fontFamily: "'Inter', sans-serif",
               fontSize: '0.7rem',
               color: 'rgba(255,255,255,0.3)',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.03em',
+              margin: 0,
             }}
           >
             © 2026 Инна Егорушкина. Авторская студия ресниц и бровей.
           </p>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </ScrollDirectionReveal>
   );
 }
