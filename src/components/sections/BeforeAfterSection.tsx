@@ -21,26 +21,49 @@ import work11 from '../../assets/portfolio/work-11.jpg';
 
 const WORKS = [work01, work02, work03, work04, work05, work06, work07, work08, work09, work10, work11];
 
-// Раскладка мозаики: span по колонкам/строкам (на десктопе сетка 6 колонок)
-// t = tall (2 строки), w = wide (2 колонки), b = big (2x2), s = square (1x1)
-const LAYOUT: { span: string; aspect?: string }[] = [
-  { span: 'col-span-3 row-span-2', aspect: '4 / 5' },   // 1 большое вертикальное
-  { span: 'col-span-3', aspect: '16 / 10' },            // 2 wide
-  { span: 'col-span-3', aspect: '16 / 10' },            // 3 wide
-  { span: 'col-span-2', aspect: '1 / 1' },              // 4 квадрат
-  { span: 'col-span-2', aspect: '1 / 1' },              // 5 квадрат
-  { span: 'col-span-2', aspect: '1 / 1' },              // 6 квадрат
-  { span: 'col-span-4 row-span-2', aspect: '16 / 11' }, // 7 большое горизонтальное
-  { span: 'col-span-2', aspect: '3 / 4' },              // 8 tall
-  { span: 'col-span-3', aspect: '16 / 10' },            // 9 wide
-  { span: 'col-span-3', aspect: '16 / 10' },            // 10 wide
-  { span: 'col-span-6', aspect: '21 / 9' },             // 11 панорама
-];
+// Золотая пыль: лёгкий canvas-слой поверх фото, проявляется и растворяется при reveal
+function DustVeil({ play }: { play: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (!play) return;
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+    const N = 60;
+    const parts = Array.from({ length: N }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      r: Math.random() * 1.6 + 0.4,
+      vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4 - 0.2,
+      a: Math.random() * 0.6 + 0.3,
+    }));
+    let frame = 0; const max = 70; let raf = 0;
+    const tick = () => {
+      frame++;
+      ctx.clearRect(0, 0, w, h);
+      const life = 1 - frame / max;
+      parts.forEach((p) => {
+        p.x += p.vx; p.y += p.vy;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(212,175,55,${(p.a * life).toFixed(3)})`;
+        ctx.fill();
+      });
+      if (frame < max) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [play]);
+  return <canvas ref={ref} className="pointer-events-none absolute inset-0 w-full h-full" style={{ opacity: play ? 1 : 0 }} />;
+}
 
 function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-
   useEffect(() => {
     if (!src) return;
     document.body.classList.add('no-scroll');
@@ -58,41 +81,15 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
       gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
       gsap.fromTo(imgRef.current, { opacity: 0, scale: 0.92, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: 'power3.out', delay: 0.05 });
     }
-    return () => {
-      document.body.classList.remove('no-scroll');
-      window.removeEventListener('keydown', onKey);
-    };
+    return () => { document.body.classList.remove('no-scroll'); window.removeEventListener('keydown', onKey); };
   }, [src]);
-
   if (!src) return null;
-
   return (
-    <div
-      ref={overlayRef}
-      onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-10"
-      style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
-      role="dialog"
-      aria-modal="true"
-    >
-      <button
-        onClick={onClose}
-        aria-label="Закрыть"
-        className="absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full"
-        style={{ border: '1px solid rgba(212,175,55,0.4)', color: '#d4af37', background: 'rgba(212,175,55,0.06)' }}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-          <path d="M6 6l12 12M18 6L6 18" />
-        </svg>
+    <div ref={overlayRef} onClick={onClose} className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-10" style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }} role="dialog" aria-modal="true">
+      <button onClick={onClose} aria-label="Закрыть" className="absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full" style={{ border: '1px solid rgba(212,175,55,0.4)', color: '#d4af37', background: 'rgba(212,175,55,0.06)' }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>
-      <img
-        ref={imgRef}
-        src={src}
-        alt="Работа"
-        onClick={(e) => e.stopPropagation()}
-        className="max-w-full max-h-full object-contain rounded-[14px]"
-        style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.8), 0 0 40px rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.2)' }}
-      />
+      <img ref={imgRef} src={src} alt="Работа" onClick={(e) => e.stopPropagation()} className="max-w-full max-h-full object-contain rounded-[14px]" style={{ boxShadow: '0 30px 80px -20px rgba(0,0,0,0.8), 0 0 40px rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.2)' }} />
     </div>
   );
 }
@@ -100,6 +97,7 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
 export default function BeforeAfterSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState<string | null>(null);
+  const [played, setPlayed] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     (window as unknown as { __pfNav?: (v: string) => void }).__pfNav = (v: string) => setActive(v);
@@ -110,14 +108,19 @@ export default function BeforeAfterSection() {
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>('.pf-card');
       cards.forEach((card, i) => {
+        const img = card.querySelector('img');
+        const veilWrap = card.querySelector('.dust-veil') as HTMLElement | null;
         gsap.fromTo(
           card,
-          { opacity: 0, y: 40, filter: 'blur(8px)' },
-          {
-            opacity: 1, y: 0, filter: 'blur(0px)',
-            duration: 0.8, ease: 'power2.out', delay: (i % 3) * 0.08,
-            scrollTrigger: { trigger: card, start: 'top 88%', once: true },
-          }
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', delay: (i % 3) * 0.08,
+            scrollTrigger: { trigger: card, start: 'top 88%', once: true,
+              onEnter: () => {
+                setPlayed((p) => new Set(p).add(i));
+                if (img) gsap.fromTo(img, { filter: 'blur(14px) brightness(0.5) scale(1.06)' }, { filter: 'blur(0px) brightness(1) scale(1)', duration: 1.1, ease: 'power2.out' });
+                if (veilWrap) gsap.fromTo(veilWrap, { opacity: 1 }, { opacity: 0, duration: 1.2, ease: 'power1.out', delay: 0.15 });
+              }
+            } }
         );
       });
     }, sectionRef);
@@ -137,43 +140,44 @@ export default function BeforeAfterSection() {
           </p>
         </ScrollDirectionReveal>
 
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-6 auto-rows-[140px] md:auto-rows-[180px] gap-3 md:gap-4">
-          {WORKS.map((src, i) => {
-            const lay = LAYOUT[i] ?? { span: 'col-span-2', aspect: '1 / 1' };
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setActive(src)}
-                className={`pf-card group relative overflow-hidden rounded-[16px] cursor-pointer ${lay.span}`}
-                style={{
-                  border: '1px solid rgba(212,175,55,0.14)',
-                  boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)',
-                  transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
-                  padding: 0, background: 'transparent', aspectRatio: lay.aspect,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)';
-                  e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)';
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)';
-                  e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <img
-                  src={src}
-                  alt={`Моя работа ${i + 1}`}
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  style={{ display: 'block' }}
-                />
-                <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(212,175,55,0.10) 100%)' }} />
-              </button>
-            );
-          })}
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {WORKS.map((src, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setActive(src)}
+              className="pf-card group relative block overflow-hidden rounded-[18px] cursor-pointer"
+              style={{
+                aspectRatio: i % 3 === 1 ? '3 / 4' : '1 / 1',
+                border: '1px solid rgba(212,175,55,0.14)',
+                boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)',
+                transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
+                padding: 0, background: '#0a0a0a',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)';
+                e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)';
+                e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <img
+                src={src}
+                alt={`Моя работа ${i + 1}`}
+                loading="lazy"
+                className="w-full h-full object-cover"
+                style={{ display: 'block' }}
+              />
+              <span className="dust-veil absolute inset-0" style={{ opacity: 0 }}>
+                <DustVeil play={played.has(i)} />
+              </span>
+              <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(212,175,55,0.10) 100%)' }} />
+            </button>
+          ))}
         </div>
       </div>
 
