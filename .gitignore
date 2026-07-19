@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Cache / temp
+.cache/
+tmp/
+.continue/
+
+# Logs
+build_output.txt
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local junk photos (not part of the project)
+photo_*.jpg
+inna.jpg
+
+# Project docs (kept locally, not pushed)
+DOCS/
+zadanie.md
+
+# Env
+.env
+.env.local
