@@ -7,7 +7,6 @@ import ScrollDirectionReveal from '../ScrollDirectionReveal';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Реальные фото работ (сжаты до ~150KB, EXIF-поворот учтён)
 import work01 from '../../assets/portfolio/work-01.jpg';
 import work02 from '../../assets/portfolio/work-02.jpg';
 import work03 from '../../assets/portfolio/work-03.jpg';
@@ -22,6 +21,22 @@ import work11 from '../../assets/portfolio/work-11.jpg';
 
 const WORKS = [work01, work02, work03, work04, work05, work06, work07, work08, work09, work10, work11];
 
+// Раскладка мозаики: span по колонкам/строкам (на десктопе сетка 6 колонок)
+// t = tall (2 строки), w = wide (2 колонки), b = big (2x2), s = square (1x1)
+const LAYOUT: { span: string; aspect?: string }[] = [
+  { span: 'col-span-3 row-span-2', aspect: '4 / 5' },   // 1 большое вертикальное
+  { span: 'col-span-3', aspect: '16 / 10' },            // 2 wide
+  { span: 'col-span-3', aspect: '16 / 10' },            // 3 wide
+  { span: 'col-span-2', aspect: '1 / 1' },              // 4 квадрат
+  { span: 'col-span-2', aspect: '1 / 1' },              // 5 квадрат
+  { span: 'col-span-2', aspect: '1 / 1' },              // 6 квадрат
+  { span: 'col-span-4 row-span-2', aspect: '16 / 11' }, // 7 большое горизонтальное
+  { span: 'col-span-2', aspect: '3 / 4' },              // 8 tall
+  { span: 'col-span-3', aspect: '16 / 10' },            // 9 wide
+  { span: 'col-span-3', aspect: '16 / 10' },            // 10 wide
+  { span: 'col-span-6', aspect: '21 / 9' },             // 11 панорама
+];
+
 function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -32,15 +47,13 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        // навигация по стрелкам
-        const idx = WORKS.indexOf(src as unknown as string);
+        const idx = WORKS.indexOf(src);
         const next = e.key === 'ArrowRight' ? (idx + 1) % WORKS.length : (idx - 1 + WORKS.length) % WORKS.length;
         onClose();
-        setTimeout(() => onNavigate(WORKS[next]), 0);
+        setTimeout(() => (window as unknown as { __pfNav?: (v: string) => void }).__pfNav?.(WORKS[next]), 0);
       }
     };
     window.addEventListener('keydown', onKey);
-    // анимация появления
     if (overlayRef.current && imgRef.current) {
       gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
       gsap.fromTo(imgRef.current, { opacity: 0, scale: 0.92, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: 'power3.out', delay: 0.05 });
@@ -49,11 +62,7 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
       document.body.classList.remove('no-scroll');
       window.removeEventListener('keydown', onKey);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
-
-  // хук для навигации (передаётся снаружи)
-  const onNavigate = (s: string) => (window as unknown as { __pfNav?: (v: string) => void }).__pfNav?.(s);
 
   if (!src) return null;
 
@@ -76,7 +85,6 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </button>
-
       <img
         ref={imgRef}
         src={src}
@@ -93,12 +101,9 @@ export default function BeforeAfterSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState<string | null>(null);
 
-  // связываем навигацию из Lightbox
   useEffect(() => {
     (window as unknown as { __pfNav?: (v: string) => void }).__pfNav = (v: string) => setActive(v);
-    return () => {
-      delete (window as unknown as { __pfNav?: (v: string) => void }).__pfNav;
-    };
+    return () => { delete (window as unknown as { __pfNav?: (v: string) => void }).__pfNav; };
   }, []);
 
   useEffect(() => {
@@ -109,12 +114,8 @@ export default function BeforeAfterSection() {
           card,
           { opacity: 0, y: 40, filter: 'blur(8px)' },
           {
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)',
-            duration: 0.8,
-            ease: 'power2.out',
-            delay: (i % 3) * 0.08,
+            opacity: 1, y: 0, filter: 'blur(0px)',
+            duration: 0.8, ease: 'power2.out', delay: (i % 3) * 0.08,
             scrollTrigger: { trigger: card, start: 'top 88%', once: true },
           }
         );
@@ -127,86 +128,52 @@ export default function BeforeAfterSection() {
     <section id="gallery" ref={sectionRef} className="relative section-padding overflow-hidden">
       <div className="section-container">
         <ScrollDirectionReveal>
-          <span
-            className="block mb-3"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.2em',
-              color: 'var(--text-muted)',
-            }}
-          >
+          <span className="block mb-3" style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }}>
             Портфолио
           </span>
-          <BreathText
-            as="h2"
-            text="Мои работы"
-            className="mb-4"
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 'clamp(2rem, 5vw, 3.4rem)',
-              fontWeight: 500,
-              color: 'var(--text-primary)',
-              lineHeight: 1.1,
-            }}
-          />
-          <p
-            className="max-w-xl"
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 'clamp(0.9rem, 1.4vw, 1rem)',
-              color: 'var(--text-secondary)',
-              fontWeight: 300,
-              lineHeight: 1.6,
-            }}
-          >
+          <BreathText as="h2" text="Мои работы" className="mb-4" style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(2rem, 5vw, 3.4rem)', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.1 }} />
+          <p className="max-w-xl" style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(0.9rem, 1.4vw, 1rem)', color: 'var(--text-secondary)', fontWeight: 300, lineHeight: 1.6 }}>
             Брови и ресницы — каждая деталь имеет значение. Смотрите результаты своими глазами.
           </p>
         </ScrollDirectionReveal>
 
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {WORKS.map((src, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setActive(src)}
-              className="pf-card group relative block overflow-hidden rounded-[18px] cursor-pointer"
-              style={{
-                aspectRatio: i % 3 === 1 ? '3 / 4' : '1 / 1',
-                border: '1px solid rgba(212,175,55,0.14)',
-                boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)',
-                transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
-                padding: 0,
-                background: 'transparent',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)';
-                e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)';
-                e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              <img
-                src={src}
-                alt={`Моя работа ${i + 1}`}
-                loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                style={{ display: 'block' }}
-              />
-              <span
-                className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400"
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-6 auto-rows-[140px] md:auto-rows-[180px] gap-3 md:gap-4">
+          {WORKS.map((src, i) => {
+            const lay = LAYOUT[i] ?? { span: 'col-span-2', aspect: '1 / 1' };
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActive(src)}
+                className={`pf-card group relative overflow-hidden rounded-[16px] cursor-pointer ${lay.span}`}
                 style={{
-                  background:
-                    'radial-gradient(ellipse at center, transparent 55%, rgba(212,175,55,0.10) 100%)',
+                  border: '1px solid rgba(212,175,55,0.14)',
+                  boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)',
+                  transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
+                  padding: 0, background: 'transparent', aspectRatio: lay.aspect,
                 }}
-              />
-            </button>
-          ))}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)';
+                  e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)';
+                  e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <img
+                  src={src}
+                  alt={`Моя работа ${i + 1}`}
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  style={{ display: 'block' }}
+                />
+                <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(212,175,55,0.10) 100%)' }} />
+              </button>
+            );
+          })}
         </div>
       </div>
 
