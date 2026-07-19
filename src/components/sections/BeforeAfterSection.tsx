@@ -21,46 +21,6 @@ import work11 from '../../assets/portfolio/work-11.jpg';
 
 const WORKS = [work01, work02, work03, work04, work05, work06, work07, work08, work09, work10, work11];
 
-// Золотая пыль: лёгкий canvas-слой поверх фото, проявляется и растворяется при reveal
-function DustVeil({ play }: { play: boolean }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    if (!play) return;
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    canvas.width = w * dpr; canvas.height = h * dpr;
-    ctx.scale(dpr, dpr);
-    const N = 60;
-    const parts = Array.from({ length: N }, () => ({
-      x: Math.random() * w, y: Math.random() * h,
-      r: Math.random() * 1.6 + 0.4,
-      vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4 - 0.2,
-      a: Math.random() * 0.6 + 0.3,
-    }));
-    let frame = 0; const max = 70; let raf = 0;
-    const tick = () => {
-      frame++;
-      ctx.clearRect(0, 0, w, h);
-      const life = 1 - frame / max;
-      parts.forEach((p) => {
-        p.x += p.vx; p.y += p.vy;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(212,175,55,${(p.a * life).toFixed(3)})`;
-        ctx.fill();
-      });
-      if (frame < max) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [play]);
-  return <canvas ref={ref} className="pointer-events-none absolute inset-0 w-full h-full" style={{ opacity: play ? 1 : 0 }} />;
-}
-
 function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -97,7 +57,6 @@ function Lightbox({ src, onClose }: { src: string | null; onClose: () => void })
 export default function BeforeAfterSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState<string | null>(null);
-  const [played, setPlayed] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     (window as unknown as { __pfNav?: (v: string) => void }).__pfNav = (v: string) => setActive(v);
@@ -108,19 +67,11 @@ export default function BeforeAfterSection() {
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray<HTMLElement>('.pf-card');
       cards.forEach((card, i) => {
-        const img = card.querySelector('img');
-        const veilWrap = card.querySelector('.dust-veil') as HTMLElement | null;
         gsap.fromTo(
           card,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', delay: (i % 3) * 0.08,
-            scrollTrigger: { trigger: card, start: 'top 88%', once: true,
-              onEnter: () => {
-                setPlayed((p) => new Set(p).add(i));
-                if (img) gsap.fromTo(img, { filter: 'blur(14px) brightness(0.5) scale(1.06)' }, { filter: 'blur(0px) brightness(1) scale(1)', duration: 1.1, ease: 'power2.out' });
-                if (veilWrap) gsap.fromTo(veilWrap, { opacity: 1 }, { opacity: 0, duration: 1.2, ease: 'power1.out', delay: 0.15 });
-              }
-            } }
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: (i % 3) * 0.06,
+            scrollTrigger: { trigger: card, start: 'top 90%', once: true } }
         );
       });
     }, sectionRef);
@@ -140,15 +91,14 @@ export default function BeforeAfterSection() {
           </p>
         </ScrollDirectionReveal>
 
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="mt-12 columns-2 md:columns-3 gap-4 md:gap-5 [&>*]:mb-4 md:[&>*]:mb-5">
           {WORKS.map((src, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setActive(src)}
-              className="pf-card group relative block overflow-hidden rounded-[18px] cursor-pointer"
+              className="pf-card group relative block overflow-hidden rounded-[16px] cursor-pointer break-inside-avoid w-full"
               style={{
-                aspectRatio: i % 3 === 1 ? '3 / 4' : '1 / 1',
                 border: '1px solid rgba(212,175,55,0.14)',
                 boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)',
                 transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
@@ -169,12 +119,9 @@ export default function BeforeAfterSection() {
                 src={src}
                 alt={`Моя работа ${i + 1}`}
                 loading="lazy"
-                className="w-full h-full object-cover"
+                className="w-full h-auto object-cover block group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                 style={{ display: 'block' }}
               />
-              <span className="dust-veil absolute inset-0" style={{ opacity: 0 }}>
-                <DustVeil play={played.has(i)} />
-              </span>
               <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(212,175,55,0.10) 100%)' }} />
             </button>
           ))}
