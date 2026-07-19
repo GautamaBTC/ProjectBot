@@ -21,7 +21,7 @@ Thumbs.db
 
 # Local junk photos (not part of the project)
 photo_*.jpg
-inna.jpg
+# NOTE: D:/PROJECT777/inna.jpg is stray; the project asset src/assets/hero/inna.jpg is needed
 
 # Project docs (kept locally, not pushed)
 DOCS/
