@@ -23,6 +23,9 @@ Thumbs.db
 photo_*.jpg
 # NOTE: D:/PROJECT777/inna.jpg is stray; the project asset src/assets/hero/inna.jpg is needed
 
+# Vercel local project link (not for repo)
+.vercel/
+
 # Project docs (kept locally, not pushed)
 DOCS/
 zadanie.md
@@ -30,3 +33,4 @@ zadanie.md
 # Env
 .env
 .env.local
+.vercel

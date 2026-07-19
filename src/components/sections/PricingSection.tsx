@@ -70,10 +70,43 @@ export default function PricingSection() {
             />
           </ScrollDirectionReveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
-            {CATEGORIES.map(({ key, label }) => (
-              <ScrollDirectionReveal>
-              <div key={key} className="price-col">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12 items-start">
+            {CATEGORIES.map(({ key, label }, idx) => {
+              const featured = key === 'complex';
+              return (
+              <ScrollDirectionReveal key={key}>
+              <div
+                className="price-col relative"
+                style={
+                  featured
+                    ? {
+                        border: '1px solid rgba(212,175,55,0.45)',
+                        borderRadius: '20px',
+                        padding: '1.75rem 1.5rem',
+                        background: 'rgba(212,175,55,0.05)',
+                        boxShadow: '0 0 40px rgba(212,175,55,0.10)',
+                        transform: 'translateY(-8px)',
+                      }
+                    : undefined
+                }
+              >
+                {featured && (
+                  <span
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full"
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.6rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.2em',
+                      color: '#0a0a0a',
+                      background: 'linear-gradient(135deg, #d4af37, #f0d878)',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Популярно
+                  </span>
+                )}
                 <h3
                   className="mb-6"
                   style={{
@@ -123,7 +156,8 @@ export default function PricingSection() {
                 </div>
               </div>
               </ScrollDirectionReveal>
-            ))}
+              );
+            })}
           </div>
 
           <Reveal delay={0.1}>

@@ -622,16 +622,16 @@ function Navigation() {
                       ref={i === 0 ? firstLinkRef : undefined}
                       onClick={handleNavClick(link.href)}
                       className={`group relative text-[0.75rem] uppercase tracking-[0.2em] transition-colors duration-300 hover:text-[#d4af37] ${
-                        isActive ? 'text-[#d4af37]' : 'text-white/70'
+                        isActive ? 'text-[#d4af37] font-medium' : 'text-white/70'
                       }`}
                       style={{ textDecoration: 'none' }}
                     >
                       <span
-                        className={`absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-px bg-[#d4af37] transition-opacity duration-300 ${
-                          isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        className={`absolute -left-4 top-1/2 -translate-y-1/2 w-2 h-px bg-[#d4af37] transition-all duration-300 ${
+                          isActive ? 'opacity-100 shadow-[0_0_8px_rgba(212,175,55,0.8)]' : 'opacity-0 group-hover:opacity-100'
                         }`}
                       />
-                      <span className="mr-2 text-[0.6rem] text-[#d4af37]/60">{String(i + 1).padStart(2, '0')}</span>
+                      <span className={`mr-2 text-[0.6rem] transition-opacity duration-300 ${isActive ? 'text-[#d4af37] opacity-100' : 'text-[#d4af37]/50'}`}>{String(i + 1).padStart(2, '0')}</span>
                       {link.label}
                     </a>
                   </li>
