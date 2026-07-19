@@ -104,8 +104,10 @@ export default function ParticleMenuItem({ label, anim, idx, menuOpen, active = 
           fontSize: "0.7rem",
           letterSpacing: "0.15em",
           color: "#d4af37",
-          opacity: active ? 0.9 : 0.45,
+          // Номер гаснет синхронно с dust-рассыпанием букв (задержка 260ms при закрытии)
+          opacity: !menuOpen ? 0 : (active ? 0.9 : 0.45),
           transition: "opacity 0.3s ease",
+          transitionDelay: menuOpen ? "0s" : "0.26s",
           minWidth: "1.6em",
           textAlign: "right",
         }}

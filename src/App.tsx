@@ -496,20 +496,15 @@ function Navigation() {
           .fromTo(navRef.current?.children ?? [],
             { y: 30, opacity: 0 },
             { y: 0, opacity: 1, stagger: 0.1, duration: 0.8, delay: 0.3, clearProps: 'opacity,transform' }
-          , '<')
-          .fromTo(dividerRefs.current.filter(Boolean),
-            { scaleX: 0, opacity: 0 },
-            { scaleX: 1, opacity: 1, stagger: 0.1, duration: 0.2 }
-          , '-=0.6');
+          , '<');
       } else {
         // НЕ анимируем детей navRef (это <a>, внутри — ParticleMenuItem).
         // Dust-рассыпание букв при закрытии делает сам ParticleMenuItem.
-        // Иначе gsap.to(items, opacity:0) перебивал бы dust-анимацию.
-        const divs = dividerRefs.current.filter(Boolean).reverse();
+        // Разделители и номера гаснут синхронно через CSS (opacity по menuOpen
+        // с transitionDelay 0.26s — совпадает с задержкой dust-рассыпания).
+        // Оверлей гаснет ПОСЛЕ dust-рассыпания пунктов (~260ms в ParticleMenuItem).
         const tl = gsap.timeline({ defaults: { ease: 'power2.in' } });
-        tl.to(divs, { scaleX: 0, opacity: 0, stagger: 0.04, duration: 0.1 })
-          // оверлей гаснет ПОСЛЕ dust-рассыпания пунктов (~260ms в ParticleMenuItem)
-          .to(overlayRef.current, { opacity: 0, duration: 0.35 }, '+=0.18');
+        tl.to(overlayRef.current, { opacity: 0, duration: 0.35 }, '+=0.18');
       }
     }, overlayRef);
     // ВАЖНО: НЕ ctx.revert() — он мгновенно сбрасывал opacity к 0,
@@ -518,7 +513,6 @@ function Navigation() {
       // Защита: если timeline прерывается (kill) до завершения,
       // пункты меню не должны оставаться невидимыми (opacity:0 от gsap.fromTo)
       gsap.set(navRef.current?.children ?? [], { opacity: 1, y: 0, clearProps: 'opacity,transform' });
-      gsap.set(dividerRefs.current.filter(Boolean), { opacity: 1, scaleX: 1, clearProps: 'opacity,transform' });
       ctx.kill();
     };
   }, [menuOpen]);
@@ -701,9 +695,15 @@ function Navigation() {
                   {i < navLinks.length - 1 && (
                     <div
                       ref={(el) => { dividerRefs.current[i] = el; }}
-                      className="menu-divider w-16 h-px my-4"
+                      className="menu-divider w-16 h-px"
                       style={{
                         background: 'linear-gradient(90deg, transparent, rgba(201,185,154,0.4), transparent)',
+                        margin: '0 auto',
+                        opacity: menuOpen ? 1 : 0,
+                        transform: menuOpen ? 'scaleX(1)' : 'scaleX(0)',
+                        transformOrigin: 'center',
+                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        transitionDelay: menuOpen ? '0.2s' : '0.26s',
                       }}
                     />
                   )}
