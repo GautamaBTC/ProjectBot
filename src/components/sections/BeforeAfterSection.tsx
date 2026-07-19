@@ -3,64 +3,54 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Reveal from '../Reveal';
 import BreathText from '../BreathText';
-import { RevealMask } from '../RevealMask';
+import ScrollDirectionReveal from '../ScrollDirectionReveal';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Градиентные заглушки (без 404) — заменить на реальные фото позже
-const grad = (from: string, to: string) =>
-  `data:image/svg+xml;utf8,` +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='600' height='800'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${from}'/><stop offset='1' stop-color='${to}'/></linearGradient></defs><rect width='600' height='800' fill='url(#g)'/></svg>`
-  );
+// Реальные фото работ (сжаты до ~150KB, EXIF-поворот учтён)
+import work01 from '../../assets/portfolio/work-01.jpg';
+import work02 from '../../assets/portfolio/work-02.jpg';
+import work03 from '../../assets/portfolio/work-03.jpg';
+import work04 from '../../assets/portfolio/work-04.jpg';
+import work05 from '../../assets/portfolio/work-05.jpg';
+import work06 from '../../assets/portfolio/work-06.jpg';
+import work07 from '../../assets/portfolio/work-07.jpg';
+import work08 from '../../assets/portfolio/work-08.jpg';
+import work09 from '../../assets/portfolio/work-09.jpg';
+import work10 from '../../assets/portfolio/work-10.jpg';
+import work11 from '../../assets/portfolio/work-11.jpg';
 
-const WORKS = [
-  { id: 'w1', title: 'Архитектура бровей', before: grad('#3a3a3a', '#1a1a1a'), after: grad('#d4af37', '#8a6d1f') },
-  { id: 'w2', title: 'Брови + ресницы (Лами под ключ)', before: grad('#404040', '#222'), after: grad('#e8c95a', '#9c7a22') },
-  { id: 'w3', title: 'Ламинирование бровей', before: grad('#353535', '#1c1c1c'), after: grad('#c9a94a', '#7d6320') },
-  { id: 'w4', title: 'Ламинирование ресниц', before: grad('#3d3d3d', '#202020'), after: grad('#dab94f', '#806320') },
-];
+const WORKS = [work01, work02, work03, work04, work05, work06, work07, work08, work09, work10, work11];
 
 export default function BeforeAfterSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const track = trackRef.current;
-      const section = sectionRef.current;
-      if (!track || !section) return;
-
-      // Только на десктопе (md+) — pinned horizontal scroll
-      const mm = gsap.matchMedia();
-      mm.add('(min-width: 768px)', () => {
-        const getScrollAmount = () => track.scrollWidth - window.innerWidth;
-
-        const tween = gsap.to(track, {
-          x: () => -getScrollAmount(),
-          ease: 'none',
-        });
-
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top top',
-          end: () => `+=${getScrollAmount()}`,
-          pin: true,
-          scrub: 1,
-          animation: tween,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-        });
+      const cards = gsap.utils.toArray<HTMLElement>('.pf-card');
+      cards.forEach((card, i) => {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 40, filter: 'blur(8px)' },
+          {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            ease: 'power2.out',
+            delay: (i % 3) * 0.08,
+            scrollTrigger: { trigger: card, start: 'top 88%', once: true },
+          }
+        );
       });
     }, sectionRef);
-
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id="gallery" ref={sectionRef} className="relative overflow-hidden">
-      <div className="section-container pt-20 md:pt-28">
-        <Reveal>
+    <section id="gallery" ref={sectionRef} className="relative section-padding overflow-hidden">
+      <div className="section-container">
+        <ScrollDirectionReveal>
           <span
             className="block mb-3"
             style={{
@@ -75,7 +65,7 @@ export default function BeforeAfterSection() {
           </span>
           <BreathText
             as="h2"
-            text="До / После"
+            text="Наши работы"
             className="mb-4"
             style={{
               fontFamily: "'Playfair Display', serif",
@@ -95,46 +85,51 @@ export default function BeforeAfterSection() {
               lineHeight: 1.6,
             }}
           >
-            Реальные результаты работы. Проведите по фото, чтобы сравнить.
+            Реальные результаты — брови и ресницы. Авторская работа Инны Егорушкиной.
           </p>
-        </Reveal>
-      </div>
+        </ScrollDirectionReveal>
 
-      {/* Track: desktop — pinned horizontal; mobile — snap scroll */}
-      <div className="md:h-screen md:flex md:items-center mt-10 md:mt-0">
-        <div
-          ref={trackRef}
-          className="flex flex-row gap-6 px-5 md:px-[10vw] overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none pb-10 md:pb-0"
-          style={{ scrollbarWidth: 'none' } as React.CSSProperties}
-        >
-          {WORKS.map((work, i) => (
-            <div
-              key={work.id}
-              className="snap-center shrink-0 w-[78vw] sm:w-[60vw] md:w-[42vw] lg:w-[34vw]"
+        <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {WORKS.map((src, i) => (
+            <a
+              key={i}
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pf-card group relative block overflow-hidden rounded-[18px]"
+              style={{
+                aspectRatio: i % 3 === 1 ? '3 / 4' : '1 / 1',
+                border: '1px solid rgba(212,175,55,0.14)',
+                boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)',
+                transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)';
+                e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)';
+                e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              <div
-                className="relative w-full rounded-[20px] overflow-hidden"
+              <img
+                src={src}
+                alt={`Работа ${i + 1}`}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                style={{ display: 'block' }}
+              />
+              {/* Золотая виньетка при hover */}
+              <span
+                className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400"
                 style={{
-                  aspectRatio: '3 / 4',
-                  border: '1px solid rgba(212,175,55,0.15)',
-                  boxShadow: '0 20px 60px -20px rgba(0,0,0,0.6)',
+                  background:
+                    'radial-gradient(ellipse at center, transparent 55%, rgba(212,175,55,0.10) 100%)',
                 }}
-              >
-                <RevealMask beforeSrc={work.before} afterSrc={work.after} />
-              </div>
-              <p
-                className="mt-4 uppercase text-center md:text-left"
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 'clamp(0.7rem, 1.4vw, 0.85rem)',
-                  fontWeight: 500,
-                  letterSpacing: '0.3em',
-                  color: 'var(--text-secondary)',
-                }}
-              >
-                {String(i + 1).padStart(2, '0')} — {work.title}
-              </p>
-            </div>
+              />
+            </a>
           ))}
         </div>
       </div>
