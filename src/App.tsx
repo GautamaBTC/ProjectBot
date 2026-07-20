@@ -156,7 +156,7 @@ function HeroSection({ start }: { start: boolean }) {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden hero-section" style={{ height: "100dvh", background: 'transparent' }}>
+    <section className="relative w-full overflow-hidden hero-section" style={{ height: "calc(100dvh + env(safe-area-inset-bottom, 0px))", background: 'transparent' }}>
     {/* Hero показывает global-фон сквозь себя (без отдельного двигающегося видео) */}
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_8%,rgba(0,0,0,0.55)_55%,rgba(0,0,0,0.98)_100%)]" />
 
@@ -872,7 +872,7 @@ export default function App() {
       <div
         className="fixed left-0 top-0 w-full -z-10 overflow-hidden pointer-events-none"
         style={{
-          height: 'var(--app-height, 100dvh)',
+          height: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
           transform: 'translateZ(0)',
           willChange: 'transform',
           backfaceVisibility: 'hidden',
@@ -887,6 +887,7 @@ export default function App() {
           playsInline
           preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ height: '100%', width: '100%' }}
         />
         {/* Дрейфующая золотая пыль поверх видео (WebGL-вайб, без замены фона) */}
         <DustCanvas density={0.09} color="212,175,55" />

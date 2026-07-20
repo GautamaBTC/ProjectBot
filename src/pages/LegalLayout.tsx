@@ -13,7 +13,7 @@ export default function LegalLayout({ title, subtitle, children }: LegalLayoutPr
     <div
       style={{
         position: 'relative',
-        minHeight: '100vh',
+        minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
         background: '#0a0a0a',
         color: '#fff',
         fontFamily: "'Inter', sans-serif",
@@ -27,7 +27,7 @@ export default function LegalLayout({ title, subtitle, children }: LegalLayoutPr
           top: 0,
           left: 0,
           width: '100%',
-          height: 'var(--app-height, 100dvh)',
+          height: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
           zIndex: 0,
           overflow: 'hidden',
           transform: 'translateZ(0)',
