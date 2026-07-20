@@ -19,7 +19,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       onComplete();
     };
 
-    startRef.current = performance.now();
+    startRef.current = Date.now();
     let intervalId: number;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -29,24 +29,25 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     window.setTimeout(() => setLogoVisible(true), reduceMotion ? 60 : 250);
 
     intervalId = window.setInterval(() => {
-      const now = performance.now();
-      const elapsed = now - startRef.current;
+      const elapsed = Date.now() - startRef.current;
       const raw = Math.min(elapsed / effectiveMax, 1);
       const eased = 1 - Math.pow(1 - raw, 2.2);
       const pct = Math.round(eased * 100);
       setProgress(pct);
 
-      if (raw >= 1 && elapsed >= Math.min(minDuration, effectiveMax)) {
+      // Завершаем строго по реальному времени (без коротких путей),
+      // чтобы на всех устройствах (вкл. Android) прелоадер шёл ровно effectiveMax.
+      if (raw >= 1) {
         window.clearInterval(intervalId);
         window.setTimeout(finish, 220);
       }
-    }, 16);
+    }, 30);
 
     const hardStop = window.setTimeout(finish, effectiveMax + 700);
 
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
-        startRef.current = performance.now();
+        startRef.current = Date.now();
         setProgress(0);
         setLogoVisible(false);
         completed = false;
