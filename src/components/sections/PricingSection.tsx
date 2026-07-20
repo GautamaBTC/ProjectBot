@@ -144,21 +144,25 @@ export default function PricingSection() {
                     }
                   >
                     {featured && (
-                      <span
-                        className="absolute -top-3 right-5 px-3 py-1 rounded-full"
-                        style={{
-                          fontFamily: "'Inter', sans-serif",
-                          fontSize: '0.6rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.2em',
-                          color: '#0a0a0a',
-                          background: 'linear-gradient(135deg, #d4af37, #f0d878)',
-                          fontWeight: 700,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        ★ ХИТ
-                      </span>
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                        <span
+                          className="block h-px w-8 mb-1"
+                          style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.8), transparent)' }}
+                        />
+                        <span
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontSize: '0.62rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.32em',
+                            color: '#d4af37',
+                            fontWeight: 500,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Популярно
+                        </span>
+                      </div>
                     )}
 
                     {/* Заголовок категории с иконкой */}
