@@ -26,24 +26,34 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
   const overlayRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [pos, setPos] = useState(index ?? 0);
+  const [closing, setClosing] = useState(false);
   const drag = useRef<{ x: number; active: boolean }>({ x: 0, active: false });
 
   useEffect(() => { if (index !== null) setPos(index); }, [index]);
+  useEffect(() => { if (index !== null) setClosing(false); }, [index]);
+
+  const doClose = () => {
+    if (closing) return;
+    setClosing(true);
+    const el = overlayRef.current;
+    if (el) {
+      gsap.to(el, { opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: onClose });
+    } else onClose();
+  };
 
   useEffect(() => {
     if (index === null) return;
     document.body.classList.add('no-scroll');
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') doClose();
       if (e.key === 'ArrowRight') setPos((p) => (p + 1) % WORKS.length);
       if (e.key === 'ArrowLeft') setPos((p) => (p - 1 + WORKS.length) % WORKS.length);
     };
     window.addEventListener('keydown', onKey);
     if (overlayRef.current) gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
     return () => { document.body.classList.remove('no-scroll'); window.removeEventListener('keydown', onKey); };
-  }, [index, onClose]);
+  }, [index, onClose, closing]);
 
-  // анимация смены фото
   useEffect(() => {
     if (index === null || !imgRef.current) return;
     gsap.fromTo(imgRef.current, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' });
@@ -63,14 +73,22 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
   return (
     <div
       ref={overlayRef}
-      onClick={onClose}
+      onClick={doClose}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center px-4 py-10"
       style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', touchAction: 'pan-y' }}
       role="dialog"
       aria-modal="true"
     >
-      <button onClick={onClose} aria-label="Закрыть" className="absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full" style={{ border: '1px solid rgba(212,175,55,0.4)', color: '#d4af37', background: 'rgba(212,175,55,0.06)' }}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      {/* Крестик: без рамки/фона, вращается при наведении */}
+      <button
+        onClick={(e) => { e.stopPropagation(); doClose(); }}
+        aria-label="Закрыть"
+        className="group absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full"
+        style={{ background: 'transparent', border: 'none', color: '#d4af37', cursor: 'pointer' }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="transition-transform duration-300 ease-out group-hover:rotate-90">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
       </button>
 
       <img
@@ -123,7 +141,7 @@ export default function BeforeAfterSection() {
           </p>
         </ScrollDirectionReveal>
 
-        {/* Компактный блок: 4 фото, не раздувает страницу */}
+        {/* Компактный блок: 4 фото */}
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {FEATURED.map((src, i) => (
             <button
@@ -140,8 +158,8 @@ export default function BeforeAfterSection() {
           ))}
         </div>
 
-        {/* Кнопка опущена ниже, в едином стиле сайта (Button gold) */}
-        <div className="mt-16 flex justify-center">
+        {/* Кнопка вынесена в отдельный блок, отделена от фото большим отступом */}
+        <div style={{ marginTop: '4rem' }} className="flex justify-center">
           <Button variant="gold" onClick={() => setCarousel(0)}>
             Смотреть все работы
           </Button>

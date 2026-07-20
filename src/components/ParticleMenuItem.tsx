@@ -35,6 +35,12 @@ export default function ParticleMenuItem({ label, anim, idx, menuOpen, active = 
   // Порядковый номер пункта: 01, 02, 03…
   const numLabel = String(idx + 1).padStart(2, "0");
 
+  // Синхронизация номера с буквами: номер ведёт себя КАК ПЕРВАЯ БУКВА пункта
+  // (тот же revealed/settled, тот же dust blur/translate и transition) —
+  // чтобы появление и исчезновение были абсолютно синхронны с текстом.
+  const firstRevealed = revealedChars[0] ?? false;
+  const firstSettled = settledChars[0] ?? false;
+
   // Generate stable random offsets for dust scatter per character
   const dustOffsets = useMemo(() => chars.map(() => ({
     x: (Math.random() - 0.5) * 80,
@@ -104,10 +110,21 @@ export default function ParticleMenuItem({ label, anim, idx, menuOpen, active = 
           fontSize: "0.7rem",
           letterSpacing: "0.15em",
           color: "#d4af37",
-          // Номер гаснет синхронно с dust-рассыпанием букв (задержка 260ms при закрытии)
-          opacity: !menuOpen ? 0 : (active ? 0.9 : 0.45),
-          transition: "opacity 0.3s ease",
-          transitionDelay: menuOpen ? "0s" : "0.26s",
+          // Номер = первая буква: те же фазы revealed/settled и dust-анимация
+          opacity: firstRevealed ? (active ? 0.9 : 0.45) : 0,
+          transform: firstSettled
+            ? "translate(0, 0) scale(1)"
+            : firstRevealed
+              ? "translate(2px, -3px) scale(0.95)"
+              : "translate(4px, -6px) scale(0.7)",
+          filter: firstSettled
+            ? "blur(0px)"
+            : firstRevealed
+              ? "blur(3px)"
+              : "blur(6px)",
+          transition: firstSettled
+            ? "opacity 0.2s ease, transform 0.23s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s ease"
+            : "opacity 0.13s ease, transform 0.13s ease, filter 0.13s ease",
           minWidth: "1.6em",
           textAlign: "right",
         }}
