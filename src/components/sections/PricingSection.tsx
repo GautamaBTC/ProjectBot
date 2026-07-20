@@ -4,8 +4,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Reveal from '../Reveal';
 import ScrollDirectionReveal from '../ScrollDirectionReveal';
 import BreathText from '../BreathText';
-import { PRICES, CONTACTS } from '../../lib/constants';
-import Button from '../ui/Button';
+import { CONTACTS } from '../../lib/constants';
+import { MAX_ICON_SVG } from './Footer';
+import { siWhatsapp, siTelegram, siInstagram } from 'simple-icons';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,14 +31,14 @@ const ICON_STAR = (
   </svg>
 );
 
-// Понятные названия + пояснения (поверх PRICES)
+// Категории услуг (без цен — стоимость в личке)
 const CATEGORIES: {
-  key: keyof typeof PRICES;
+  key: string;
   label: string;
   icon: JSX.Element;
   hint?: string;
-  plain: string[]; // человекочитаемые названия в том же порядке, что PRICES[key]
-  notes: string[]; // короткие пояснения
+  plain: string[];
+  notes: string[];
 }[] = [
   {
     key: 'brows',
@@ -59,9 +60,48 @@ const CATEGORIES: {
     icon: ICON_STAR,
     hint: 'Всё включено: коррекция, ламинирование и окрашивание',
     plain: ['Full-комплекс: брови + ресницы'],
-    notes: ['Экономия 400 ₽'],
+    notes: ['Выгоднее, чем по отдельности'],
   },
 ];
+
+// Кнопки мессенджеров → личка (МАХ тоже мессенджер)
+const MESSENGERS = [
+  {
+    key: 'max',
+    label: 'MAX',
+    href: 'https://max.ru/u/f9LHodD0cOIir7qb5GjNhTwpuJg_nGJp9F6fB4UqWpAAc1XRRLgunAPZ7uM',
+    svg: MAX_ICON_SVG,
+  },
+  {
+    key: 'telegram',
+    label: 'Telegram',
+    href: 'https://t.me/inna_egorushkina',
+    svg: siTelegram.svg,
+  },
+  {
+    key: 'whatsapp',
+    label: 'WhatsApp',
+    href: `https://wa.me/${CONTACTS.whatsapp}`,
+    svg: siWhatsapp.svg,
+  },
+  {
+    key: 'instagram',
+    label: 'Instagram',
+    href: 'https://instagram.com/inna.egorushkina',
+    svg: siInstagram.svg,
+  },
+];
+
+// Превращает svg-строку simple-icons (#fff/#000) в золотую иконку
+function MessengerIcon({ svg }: { svg: string }) {
+  const colored = svg.replace(/fill="(.*?)"/g, 'fill="#d4af37"').replace(/fill:#000/gi, 'fill:#d4af37').replace(/fill:#fff/gi, 'fill:#d4af37');
+  return (
+    <span
+      style={{ width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+      dangerouslySetInnerHTML={{ __html: colored }}
+    />
+  );
+}
 
 export default function PricingSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -102,11 +142,11 @@ export default function PricingSection() {
                 color: 'var(--text-muted)',
               }}
             >
-              Цены
+              Запись
             </span>
             <BreathText
               as="h2"
-              text="Выберите свой формат"
+              text="Запись и стоимость"
               style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: 'clamp(2rem, 5vw, 3.4rem)',
@@ -121,7 +161,6 @@ export default function PricingSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-stretch">
             {CATEGORIES.map(({ key, label, icon, hint, plain, notes }, idx) => {
               const featured = key === 'complex';
-              const items = PRICES[key];
               return (
                 <ScrollDirectionReveal key={key}>
                   <div
@@ -192,39 +231,25 @@ export default function PricingSection() {
                       </h3>
                     </div>
 
-                    {/* Услуги */}
+                    {/* Услуги (без цен) */}
                     <div className="flex flex-col flex-1">
-                      {items.map((item, i) => (
+                      {plain.map((name, i) => (
                         <div
-                          key={item.id}
+                          key={name}
                           className="py-4"
-                          style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(212,175,55,0.10)' : 'none' }}
+                          style={{ borderBottom: i < plain.length - 1 ? '1px solid rgba(212,175,55,0.10)' : 'none' }}
                         >
-                          <div className="flex items-baseline justify-between gap-4">
-                            <span
-                              style={{
-                                fontFamily: "'Inter', sans-serif",
-                                fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)',
-                                color: 'var(--text-primary)',
-                                fontWeight: 400,
-                                lineHeight: 1.3,
-                              }}
-                            >
-                              {plain[i] ?? item.name}
-                            </span>
-                            <span
-                              className="shrink-0"
-                              style={{
-                                fontFamily: "'Playfair Display', serif",
-                                fontSize: 'clamp(1.05rem, 2vw, 1.3rem)',
-                                fontWeight: 600,
-                                color: gold,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {item.price}
-                            </span>
-                          </div>
+                          <span
+                            style={{
+                              fontFamily: "'Inter', sans-serif",
+                              fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)',
+                              color: 'var(--text-primary)',
+                              fontWeight: 400,
+                              lineHeight: 1.3,
+                            }}
+                          >
+                            {name}
+                          </span>
                           {notes[i] && (
                             <p
                               className="mt-1"
@@ -264,18 +289,51 @@ export default function PricingSection() {
             })}
           </div>
 
+          {/* Кнопки мессенджеров — узнать цену в личке */}
           <Reveal delay={0.1}>
             <div className="flex flex-col items-center" style={{ marginTop: '4rem' }}>
-              <Button
-                variant="gold"
-                href={`https://wa.me/${CONTACTS.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Забронировать время
-              </Button>
               <span
-                className="mt-3"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '0.85rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: 400,
+                  letterSpacing: '0.02em',
+                  marginBottom: '1.4rem',
+                  textAlign: 'center',
+                }}
+              >
+                Точную стоимость назову при записи — напишите в удобный мессенджер:
+              </span>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {MESSENGERS.map(({ key, label, href, svg }) => (
+                  <a
+                    key={key}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full"
+                    style={{
+                      border: '1px solid rgba(212,175,55,0.5)',
+                      background: 'rgba(212,175,55,0.08)',
+                      color: gold,
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '0.82rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.02em',
+                      textDecoration: 'none',
+                      transition: 'background 0.25s ease, transform 0.25s ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(212,175,55,0.18)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(212,175,55,0.08)'; e.currentTarget.style.transform = 'none'; }}
+                  >
+                    <MessengerIcon svg={svg} />
+                    {label}
+                  </a>
+                ))}
+              </div>
+              <span
+                className="mt-4"
                 style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '0.72rem',
@@ -284,7 +342,7 @@ export default function PricingSection() {
                   letterSpacing: '0.02em',
                 }}
               >
-                Ответ в течение 15 минут
+                Узнать цену в сообщении · Отвечу в течение 15 минут
               </span>
             </div>
           </Reveal>
