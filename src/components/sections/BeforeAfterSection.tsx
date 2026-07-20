@@ -167,8 +167,8 @@ export default function BeforeAfterSection() {
           </p>
         </ScrollDirectionReveal>
 
-        {/* Фильтр категорий */}
-        <div className="mt-8 flex flex-wrap justify-center gap-2 md:gap-3">
+        {/* Фильтр категорий — текстовые табы с золотым подчёркиванием */}
+        <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-3 sm:gap-x-9">
           {FILTERS.map((f) => {
             const activeF = filter === f.key;
             return (
@@ -176,20 +176,29 @@ export default function BeforeAfterSection() {
                 key={f.key}
                 type="button"
                 onClick={() => setFilter(f.key)}
-                className="px-4 py-2 rounded-full transition-all duration-300"
+                className="relative pb-2 transition-colors duration-300"
                 style={{
                   fontFamily: "'Inter', sans-serif",
-                  fontSize: '0.8rem',
+                  fontSize: '0.78rem',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.15em',
-                  color: activeF ? '#0a0a0a' : 'rgba(212,175,55,0.8)',
-                  background: activeF ? 'linear-gradient(135deg, #d4af37, #f0d878)' : 'transparent',
-                  border: `1px solid ${activeF ? 'transparent' : 'rgba(212,175,55,0.35)'}`,
-                  fontWeight: activeF ? 600 : 400,
+                  letterSpacing: '0.22em',
+                  color: activeF ? '#d4af37' : 'rgba(255,255,255,0.45)',
+                  background: 'transparent',
+                  border: 'none',
+                  fontWeight: activeF ? 500 : 400,
                   cursor: 'pointer',
                 }}
+                onMouseEnter={(e) => { if (!activeF) e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
+                onMouseLeave={(e) => { if (!activeF) e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}
               >
                 {f.label}
+                <span
+                  className="absolute left-0 bottom-0 h-px transition-all duration-400 ease-out"
+                  style={{
+                    width: activeF ? '100%' : '0%',
+                    background: 'linear-gradient(90deg, transparent, #d4af37, transparent)',
+                  }}
+                />
               </button>
             );
           })}
