@@ -14,6 +14,7 @@ const AboutSection = lazy(() => import("./components/sections/AboutSection"));
 const ServicesSectionNew = lazy(() => import("./components/sections/ServicesSection"));
 const PricingSectionNew = lazy(() => import("./components/sections/PricingSection"));
 const TestimonialsSectionNew = lazy(() => import("./components/sections/TestimonialsSection"));
+const PreparationsSection = lazy(() => import("./components/sections/PreparationsSection"));
 const BeforeAfterSection = lazy(() => import("./components/sections/BeforeAfterSection"));
 const ContactSectionNew = lazy(() => import("./components/sections/ContactSection"));
 const FooterNew = lazy(() => import("./components/sections/Footer"));
@@ -519,6 +520,7 @@ function Navigation() {
     { label: "Услуги", href: "#services", animation: "wave" as const },
     { label: "Портфолио", href: "#gallery", animation: "wave" as const },
     { label: "Цены", href: "#pricing", animation: "wave" as const },
+    { label: "Препараты", href: "#preparations", animation: "wave" as const },
     { label: "Отзывы", href: "#testimonials", animation: "wave" as const },
     { label: "Контакты", href: "#contact", animation: "wave" as const },
   ];
@@ -794,6 +796,7 @@ export default function App() {
         <ServicesSectionNew />
         <BeforeAfterSection />
         <PricingSectionNew />
+        <PreparationsSection />
         <TestimonialsSectionNew />
         <ContactSectionNew />
         <FooterNew />
