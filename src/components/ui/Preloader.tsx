@@ -7,7 +7,8 @@ interface PreloaderProps {
 export default function Preloader({ onComplete }: PreloaderProps) {
   const [progress, setProgress] = useState(0);
   const startRef = useRef<number>(0);
-  const maxDuration = 2000; // max 2s per spec
+  const maxDuration = 2200; // максимум ~2.2s
+  const minDuration = 1200; // минимум показа, чтобы не мелькал на быстрых устройствах
 
   useEffect(() => {
     // Check reduced motion
@@ -17,28 +18,41 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       return;
     }
 
-    startRef.current = performance.now();
-    let rafId: number;
+    let completed = false;
+    const finish = () => {
+      if (completed) return;
+      completed = true;
+      onComplete();
+    };
 
-    const tick = (now: number) => {
+    startRef.current = performance.now();
+    let intervalId: number;
+
+    // Используем setInterval вместо requestAnimationFrame:
+    // RAF на iOS (Safari) не тикает, когда вкладка в фоне / при throttle,
+    // из-за чего прелоадер мог "висеть" на iPhone. setInterval надёжнее на всех платформах.
+    intervalId = window.setInterval(() => {
+      const now = performance.now();
       const elapsed = now - startRef.current;
-      // Progress goes 0→100 linearly over maxDuration
       const raw = Math.min(elapsed / maxDuration, 1);
-      // Slight ease-out for the progress bar
       const eased = 1 - Math.pow(1 - raw, 2.5);
       const pct = Math.round(eased * 100);
       setProgress(pct);
 
-      if (raw >= 1) {
-        // Brief hold at 100% then complete
-        setTimeout(() => onComplete(), 150);
-      } else {
-        rafId = requestAnimationFrame(tick);
+      if (raw >= 1 && elapsed >= minDuration) {
+        window.clearInterval(intervalId);
+        // Короткая пауза на 100% перед скрытием
+        window.setTimeout(finish, 200);
       }
-    };
+    }, 16);
 
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
+    // Жёсткая страховка: никогда не висеть дольше maxDuration + буфер
+    const hardStop = window.setTimeout(finish, maxDuration + 600);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(hardStop);
+    };
   }, [onComplete]);
 
   return (

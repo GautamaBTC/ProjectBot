@@ -26,7 +26,7 @@ const SOCIALS = [
   { key: 'whatsapp', label: 'WhatsApp', href: `https://wa.me/${CONTACTS.whatsapp}`, icon: siWhatsapp },
   { key: 'telegram', label: 'Telegram', href: 'https://t.me/inna_egorushkina', icon: siTelegram },
   { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/inna.egorushkina', icon: siInstagram },
-  { key: 'max', label: 'MAX', href: 'https://max.ru', icon: { svg: MAX_ICON_SVG } },
+  { key: 'max', label: 'MAX', href: 'https://max.ru/u/f9LHodD0cOIir7qb5GjNhTwpuJg_nGJp9F6fB4UqWpAAc1XRRLgunAPZ7uM', icon: { svg: MAX_ICON_SVG } },
 ];
 
 const gold = '#d4af37';
