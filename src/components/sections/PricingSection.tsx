@@ -144,19 +144,27 @@ export default function PricingSection() {
                     }
                   >
                     {featured && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                        <span
-                          className="block h-px w-8 mb-1"
-                          style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.8), transparent)' }}
-                        />
+                      <div
+                        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full"
+                        style={{
+                          top: '14px',
+                          border: '1px solid rgba(212,175,55,0.55)',
+                          background: 'linear-gradient(135deg, rgba(212,175,55,0.18), rgba(240,216,120,0.06))',
+                          backdropFilter: 'blur(4px)',
+                          WebkitBackdropFilter: 'blur(4px)',
+                        }}
+                      >
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="#d4af37" aria-hidden>
+                          <path d="M12 2.5l2.7 5.7 6.3.8-4.6 4.3 1.2 6.2L12 17.9 6.4 20.5l1.2-6.2L3 9.8l6.3-.8z" />
+                        </svg>
                         <span
                           style={{
                             fontFamily: "'Inter', sans-serif",
-                            fontSize: '0.62rem',
+                            fontSize: '0.6rem',
                             textTransform: 'uppercase',
-                            letterSpacing: '0.32em',
-                            color: '#d4af37',
-                            fontWeight: 500,
+                            letterSpacing: '0.28em',
+                            color: '#f0d878',
+                            fontWeight: 600,
                             whiteSpace: 'nowrap',
                           }}
                         >
@@ -166,7 +174,7 @@ export default function PricingSection() {
                     )}
 
                     {/* Заголовок категории с иконкой */}
-                    <div className="flex items-center gap-3 mb-6">
+                    <div className={`flex items-center gap-3 mb-6 ${featured ? 'mt-9' : ''}`}>
                       <span className="flex items-center justify-center w-10 h-10 rounded-full" style={{ border: '1px solid rgba(212,175,55,0.3)', background: 'rgba(212,175,55,0.06)' }}>
                         {icon}
                       </span>
