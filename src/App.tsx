@@ -9,6 +9,7 @@ import ContactBlock from "./components/ContactBlock";
 import ParticleMenuItem from "./components/ParticleMenuItem";
 import PenNameReveal from "./components/PenNameReveal";
 import Preloader from "./components/ui/Preloader";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const AboutSection = lazy(() => import("./components/sections/AboutSection"));
 const ServicesSectionNew = lazy(() => import("./components/sections/ServicesSection"));
@@ -899,14 +900,30 @@ export default function App() {
       <Navigation />
       <HeroSection start={isLoaded} />
       <Suspense fallback={<div style={{ minHeight: '50vh' }} />}>
-        <AboutSection />
-        <ServicesSectionNew />
-        <BeforeAfterSection />
-        <PricingSectionNew />
-        <PreparationsSection />
-        <TestimonialsSectionNew />
-        <ContactSectionNew />
-        <FooterNew />
+        <ErrorBoundary label="About">
+          <AboutSection />
+        </ErrorBoundary>
+        <ErrorBoundary label="Services">
+          <ServicesSectionNew />
+        </ErrorBoundary>
+        <ErrorBoundary label="BeforeAfter">
+          <BeforeAfterSection />
+        </ErrorBoundary>
+        <ErrorBoundary label="Pricing">
+          <PricingSectionNew />
+        </ErrorBoundary>
+        <ErrorBoundary label="Preparations">
+          <PreparationsSection />
+        </ErrorBoundary>
+        <ErrorBoundary label="Testimonials">
+          <TestimonialsSectionNew />
+        </ErrorBoundary>
+        <ErrorBoundary label="Contact">
+          <ContactSectionNew />
+        </ErrorBoundary>
+        <ErrorBoundary label="Footer">
+          <FooterNew />
+        </ErrorBoundary>
       </Suspense>
       </div>
     </>
