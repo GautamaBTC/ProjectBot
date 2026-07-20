@@ -21,7 +21,7 @@ const FooterNew = lazy(() => import("./components/sections/Footer"));
 
 gsap.registerPlugin(ScrollTrigger);
 
-function HeroSection() {
+function HeroSection({ start }: { start: boolean }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const shineStartRef = useRef<(() => void) | null>(null);
 
@@ -341,7 +341,7 @@ function HeroSection() {
           <PenNameReveal
             line1="Инна"
             line2="Егорушкина"
-            active={true}
+            active={start}
             className="hero-name"
             style={{ opacity: 1, textShadow: '0 0 80px rgba(212,175,55,0.15)' }}
             onAnimationComplete={() => {
@@ -781,6 +781,8 @@ function Navigation() {
 
 export default function App() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Динамическая высота вьюпорта — фикс дерганья fixed-фона при скрытии/показе
   // панели браузера на Android (home/закладки/поиск). Слушаем ТОЛЬКО реальное
@@ -806,9 +808,70 @@ export default function App() {
     };
   }, []);
 
+  // Прелоадер ждёт загрузки видеофона. Как только видео готово (loadeddata),
+  // прелоадер скрывается и ТОЛЬКО ТОГДА запускается анимация Hero (видео уже на месте).
+  useEffect(() => {
+    const video = videoRef.current;
+    const mountTime = Date.now();
+    const MIN_SHOW = 1200; // минимум показа, чтобы не моргнул на кэше
+    let settled = false;
+
+    const markReady = () => {
+      if (settled) return;
+      settled = true;
+      setProgress(100);
+      const wait = Math.max(0, MIN_SHOW - (Date.now() - mountTime));
+      window.setTimeout(() => setIsLoaded(true), wait + 350);
+    };
+
+    let fake = 0;
+    const fakeTimer = window.setInterval(() => {
+      if (settled) return;
+      fake = Math.min(fake + 1.5, 85);
+      setProgress((p) => Math.max(p, Math.round(fake)));
+    }, 60);
+
+    if (video) {
+      if (video.readyState >= 2) {
+        markReady();
+      } else {
+        const onData = () => markReady();
+        video.addEventListener('loadeddata', onData);
+        video.addEventListener('canplay', onData);
+        video.addEventListener('progress', () => {
+          if (settled) return;
+          try {
+            const v = video as any;
+            if (v.buffered && v.buffered.length && v.duration) {
+              const end = v.buffered.end(v.buffered.length - 1);
+              const ratio = Math.min(end / v.duration, 0.95);
+              setProgress(Math.round(ratio * 100));
+            }
+          } catch { /* noop */ }
+        });
+      }
+    } else {
+      window.setTimeout(() => {
+        const v2 = videoRef.current;
+        if (v2 && v2.readyState >= 2) markReady();
+      }, 300);
+    }
+
+    const safety = window.setTimeout(markReady, 8000);
+
+    return () => {
+      window.clearInterval(fakeTimer);
+      window.clearTimeout(safety);
+      if (video) {
+        video.removeEventListener('loadeddata', () => markReady());
+        video.removeEventListener('canplay', () => markReady());
+      }
+    };
+  }, []);
+
   return (
     <>
-      {!isLoaded && <Preloader onComplete={() => setIsLoaded(true)} />}
+      {!isLoaded && <Preloader progress={progress} />}
       <div
         className="min-h-screen text-white font-sans"
         style={{
@@ -827,6 +890,7 @@ export default function App() {
         }}
       >
         <video
+          ref={videoRef}
           src={eyeMakeup}
           autoPlay
           muted
@@ -843,7 +907,7 @@ export default function App() {
 
 
       <Navigation />
-      <HeroSection />
+      <HeroSection start={isLoaded} />
       <Suspense fallback={<div style={{ minHeight: '50vh' }} />}>
         <AboutSection />
         <ServicesSectionNew />
