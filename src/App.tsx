@@ -385,8 +385,8 @@ function HeroSection() {
 
           {/* 3 преимущества строкой */}
           <div
-            className="hero-cta flex flex-wrap items-center justify-center gap-x-3 gap-y-1"
-            style={{ opacity: 0, marginTop: '1.1rem', maxWidth: '90vw' }}
+            className="hero-cta flex flex-wrap items-center justify-center"
+            style={{ opacity: 0, marginTop: '1.1rem', maxWidth: '90vw', columnGap: '0.75rem', rowGap: '0.25rem' }}
           >
             {['Стойкость до 4 недель', 'Без повреждений', 'Индивидуальный подбор'].map((t, i, arr) => (
               <span key={t} className="flex items-center" style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(0.72rem, 1.6vw, 0.9rem)', color: 'rgba(255,255,255,0.82)', fontWeight: 300, letterSpacing: '0.01em' }}>

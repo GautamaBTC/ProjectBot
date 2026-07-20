@@ -168,7 +168,10 @@ export default function BeforeAfterSection() {
         </ScrollDirectionReveal>
 
         {/* Фильтр категорий — текстовые табы с золотым подчёркиванием */}
-        <div className="mt-8 flex flex-wrap justify-center items-center gap-x-6 gap-y-3 sm:gap-x-9">
+        <div
+          className="mt-10 flex flex-wrap justify-center items-center"
+          style={{ columnGap: '2.25rem', rowGap: '0.75rem' }}
+        >
           {FILTERS.map((f) => {
             const activeF = filter === f.key;
             return (
