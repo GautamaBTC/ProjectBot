@@ -360,28 +360,81 @@ function HeroSection() {
           />
 
           <div className="hero-glass-frame no-sweep hero-subtitle-wrapper" style={{ opacity: 0, padding: '10px 24px', marginTop: '4px' }}>
-            <span className="hero-subtitle-shimmer line1" data-text="АВТОРСКАЯ СТУДИЯ">АВТОРСКАЯ СТУДИЯ</span>
-            <span className="hero-subtitle-shimmer line2" data-text="РЕСНИЦ & БРОВЕЙ">РЕСНИЦ & БРОВЕЙ</span>
+            <span className="hero-subtitle-shimmer line1" data-text="СТУДИЯ ВЗГЛЯД">СТУДИЯ ВЗГЛЯД</span>
+            <span className="hero-subtitle-shimmer line2" data-text="ЭСТЕТИКА БЕЗ ШАБЛОНОВ">ЭСТЕТИКА БЕЗ ШАБЛОНОВ</span>
+          </div>
+
+          {/* Заголовок-посыл (главный h1) */}
+          <h1
+            className="hero-cta"
+            style={{
+              opacity: 0,
+              marginTop: '1.4rem',
+              maxWidth: '16ch',
+              textAlign: 'center',
+              fontFamily: "'Playfair Display', serif",
+              fontWeight: 500,
+              fontSize: 'clamp(1.8rem, 5.5vw, 3.2rem)',
+              lineHeight: 1.12,
+              color: '#ffffff',
+              textShadow: '0 2px 20px rgba(0,0,0,0.6)',
+            }}
+          >
+            Индивидуальная архитектура бровей и ресниц
+          </h1>
+
+          {/* 3 преимущества строкой */}
+          <div
+            className="hero-cta flex flex-wrap items-center justify-center gap-x-3 gap-y-1"
+            style={{ opacity: 0, marginTop: '1.1rem', maxWidth: '90vw' }}
+          >
+            {['Стойкость до 4 недель', 'Без повреждений', 'Индивидуальный подбор'].map((t, i, arr) => (
+              <span key={t} className="flex items-center" style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(0.72rem, 1.6vw, 0.9rem)', color: 'rgba(255,255,255,0.82)', fontWeight: 300, letterSpacing: '0.01em' }}>
+                {t}
+                {i < arr.length - 1 && <span style={{ marginLeft: '0.75rem', color: 'rgba(212,175,55,0.7)' }}>·</span>}
+              </span>
+            ))}
           </div>
         </div>
 
         {/* Glass buttons with unified single shine */}
-        <div className="hero-buttons-wrap flex gap-4 w-full justify-center">
+        <div className="hero-buttons-wrap flex flex-col items-center gap-4 w-full justify-center">
           <div className="hero-buttons-shine-wrapper flex gap-4 w-full justify-center">
             <a
               href="#contact"
               className="hero-cta hero-btn-glass hero-btn-gold"
               style={{ opacity: 0 }}
             >
-              Записаться
+              Забронировать
             </a>
             <a
               href="#gallery"
               className="hero-cta hero-btn-glass hero-btn-white"
               style={{ opacity: 0 }}
             >
-              Портфолио
+              Примеры работ
             </a>
+          </div>
+
+          {/* Микро-доказательство: звёзды + опора на отзывы */}
+          <div
+            className="hero-cta flex items-center gap-2"
+            style={{ opacity: 0 }}
+          >
+            <span style={{ color: '#d4af37', fontSize: '0.95rem', letterSpacing: '0.1em' }}>
+              ★★★★★
+            </span>
+            <span
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '0.74rem',
+                color: 'rgba(255,255,255,0.7)',
+                fontWeight: 300,
+                letterSpacing: '0.02em',
+              }}
+            >
+              Доверяют нам — на основе отзывов клиентов
+            </span>
           </div>
         </div>
       </div>
