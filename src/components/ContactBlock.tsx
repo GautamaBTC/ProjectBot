@@ -52,7 +52,7 @@ export default function ContactBlock({ isOpen }: ContactBlockProps) {
     {
       key: 'instagram' as const,
       href: 'https://www.instagram.com/inna.egorushkina?igsh=MTN3OXQyemVwcXd6NA==',
-      label: 'запретграм',
+      label: 'инстаграм',
     },
   ];
 

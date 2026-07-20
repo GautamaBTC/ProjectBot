@@ -167,7 +167,7 @@ export default function ContactSection() {
                     <span className="text-[11px] font-black tracking-wide text-white">телеграм</span>
                   </a>
                   <a href={SOCIAL_LINKS.instagram} target="_blank" rel="noopener noreferrer" className={`${btnBase} contact-glass-btn flex-1`}>
-                    <span className="text-[11px] font-black tracking-wide text-white">запретграм</span>
+                    <span className="text-[11px] font-black tracking-wide text-white">инстаграм</span>
                   </a>
                 </div>
               </div>
