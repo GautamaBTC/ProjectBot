@@ -37,7 +37,7 @@ export default function ContactSection() {
   // Яндекс-карта по адресу студии
   const mapSrc =
     'https://yandex.ru/map-widget/v1/?text=' +
-    encodeURIComponent('Ростовская область, Шахты, переулок Фадеева, 33') +
+    encodeURIComponent('Ростовская область, Шахты, Победа Революции 128 к, Студия красоты Офелии Беккер') +
     '&z=16&lang=ru_RU';
 
   return (
