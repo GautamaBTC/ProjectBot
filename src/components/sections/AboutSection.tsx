@@ -27,28 +27,24 @@ export default function AboutSection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Photo — Mask Reveal (clip-path inset 100%→0)
+      // Photo — мягкое проявление (дыхание): opacity + лёгкий подъём + scale + blur→0
       if (photoRef.current) {
         gsap.fromTo(
           photoRef.current,
-          { clipPath: 'inset(100% 0% 0% 0%)', filter: 'blur(12px)' },
+          { opacity: 0, y: 40, scale: 1.04, filter: 'blur(14px)' },
           {
-            clipPath: 'inset(0% 0% 0% 0%)',
+            opacity: 1,
+            y: 0,
+            scale: 1,
             filter: 'blur(0px)',
-            duration: 1.2,
-            ease: 'power3.out',
-            scrollTrigger: { trigger: photoRef.current, start: 'top 80%', once: true },
+            duration: 1.4,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: photoRef.current, start: 'top 82%', once: true },
           }
         );
       }
-      // Лёгкий parallax фото (вниз, чтобы не задевать заголовок сверху)
-      if (photoRef.current) {
-        gsap.to(photoRef.current, {
-          yPercent: 5,
-          ease: 'none',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 1 },
-        });
-      }
+      // Лёгкий parallax отключён, чтобы не конфликтовать с проявлением
+      // (мягкое появление выше достаточно)
     }, sectionRef);
     return () => ctx.revert();
   }, []);
