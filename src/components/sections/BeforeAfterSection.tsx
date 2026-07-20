@@ -23,41 +23,38 @@ const WORKS = [work01, work02, work03, work04, work06, work07, work08, work09, w
 const FEATURED = WORKS.slice(0, 4);
 
 function Carousel({ index, onClose }: { index: number | null; onClose: () => void }) {
-  const overlayRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [pos, setPos] = useState(index ?? 0);
   const [closing, setClosing] = useState(false);
   const drag = useRef<{ x: number; active: boolean }>({ x: 0, active: false });
 
-  useEffect(() => { if (index !== null) setPos(index); }, [index]);
-  useEffect(() => { if (index !== null) setClosing(false); }, [index]);
+  useEffect(() => { if (index !== null) { setPos(index); setClosing(false); } }, [index]);
 
-  const doClose = () => {
-    if (closing) return;
-    setClosing(true);
-    const el = overlayRef.current;
-    if (el) {
-      gsap.to(el, { opacity: 0, duration: 0.3, ease: 'power2.in', onComplete: onClose });
-    } else onClose();
-  };
-
+  // блокируем скролл под оверлеем, НО без position:fixed (не сбрасываем к Hero)
   useEffect(() => {
     if (index === null) return;
-    document.body.classList.add('no-scroll');
+    document.body.classList.add('gallery-lock');
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') doClose();
       if (e.key === 'ArrowRight') setPos((p) => (p + 1) % WORKS.length);
       if (e.key === 'ArrowLeft') setPos((p) => (p - 1 + WORKS.length) % WORKS.length);
     };
     window.addEventListener('keydown', onKey);
-    if (overlayRef.current) gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-    return () => { document.body.classList.remove('no-scroll'); window.removeEventListener('keydown', onKey); };
-  }, [index, onClose, closing]);
+    return () => { document.body.classList.remove('gallery-lock'); window.removeEventListener('keydown', onKey); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
 
+  // анимация смены фото (появление)
   useEffect(() => {
     if (index === null || !imgRef.current) return;
     gsap.fromTo(imgRef.current, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' });
   }, [pos, index]);
+
+  const doClose = () => {
+    if (closing) return;
+    setClosing(true); // запускает CSS-transition исчезновения (opacity 0)
+    window.setTimeout(onClose, 320); // после завершения transition — закрыть
+  };
 
   const onDown = (e: React.PointerEvent) => { drag.current = { x: e.clientX, active: true }; (e.target as HTMLElement).setPointerCapture?.(e.pointerId); };
   const onUp = (e: React.PointerEvent) => {
@@ -72,23 +69,36 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
 
   return (
     <div
-      ref={overlayRef}
       onClick={doClose}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center px-4 py-10"
-      style={{ background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', touchAction: 'pan-y' }}
+      style={{
+        background: 'rgba(0,0,0,0.95)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        touchAction: 'pan-y',
+        opacity: closing ? 0 : 1,
+        transition: 'opacity 0.3s ease',
+        pointerEvents: closing ? 'none' : 'auto',
+      }}
       role="dialog"
       aria-modal="true"
     >
-      {/* Крестик: без рамки/фона, вращается при наведении */}
+      {/* Крестик-бургер: две полоски, как в меню; вращается при наведении.
+          При клике вращаем его и одновременно исчезает фото (через closing). */}
       <button
+        type="button"
         onClick={(e) => { e.stopPropagation(); doClose(); }}
         aria-label="Закрыть"
         className="group absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full"
         style={{ background: 'transparent', border: 'none', color: '#d4af37', cursor: 'pointer' }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="transition-transform duration-300 ease-out group-hover:rotate-90">
-          <path d="M6 6l12 12M18 6L6 18" />
-        </svg>
+        <span
+          className="relative block transition-transform duration-300 ease-out group-hover:rotate-90"
+          style={{ width: '26px', height: '26px' }}
+        >
+          <span className="absolute left-1/2 top-1/2 h-[2px] w-6 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: '#d4af37' }} />
+          <span className="absolute left-1/2 top-1/2 h-[2px] w-6 -translate-x-1/2 -translate-y-1/2 rotate-90 rounded-full" style={{ background: '#d4af37' }} />
+        </span>
       </button>
 
       <img
@@ -141,7 +151,6 @@ export default function BeforeAfterSection() {
           </p>
         </ScrollDirectionReveal>
 
-        {/* Компактный блок: 4 фото */}
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {FEATURED.map((src, i) => (
             <button
@@ -158,7 +167,6 @@ export default function BeforeAfterSection() {
           ))}
         </div>
 
-        {/* Кнопка вынесена в отдельный блок, отделена от фото большим отступом */}
         <div style={{ marginTop: '4rem' }} className="flex justify-center">
           <Button variant="gold" onClick={() => setCarousel(0)}>
             Смотреть все работы

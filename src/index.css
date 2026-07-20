@@ -680,6 +680,13 @@ body.no-scroll {
   overscroll-behavior: none;
 }
 
+/* Gallery lock: блокируем скролл под оверлеем, НО без position:fixed,
+   чтобы страница не сбрасывалась к верху (Hero) при открытии/закрытии */
+body.gallery-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 /* ===== MENU GLASS LAYER ===== */
 .menu-glass-layer {
   background: transparent;

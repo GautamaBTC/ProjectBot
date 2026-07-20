@@ -492,11 +492,10 @@ function Navigation() {
         // Явно сбрасываем opacity перед открытием (revert больше не делает этого)
         gsap.set(overlayRef.current, { opacity: 0 });
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-        tl.to(overlayRef.current, { opacity: 1, duration: 0.35 })
-          .fromTo(navRef.current?.children ?? [],
-            { y: 30, opacity: 0 },
-            { y: 0, opacity: 1, stagger: 0.1, duration: 0.8, delay: 0.3, clearProps: 'opacity,transform' }
-          , '<');
+        // Только fade оверлея. Пункты появляются через dust (ParticleMenuItem) —
+        // НЕ анимируем <a> здесь, иначе поздние пункты «всплывают снизу»
+        // (GSAP y-lift конфликтует с dust и виден на staggered-пунктах).
+        tl.to(overlayRef.current, { opacity: 1, duration: 0.35 });
       } else {
         // НЕ анимируем детей navRef (это <a>, внутри — ParticleMenuItem).
         // Dust-рассыпание букв при закрытии делает сам ParticleMenuItem.
@@ -510,19 +509,18 @@ function Navigation() {
     // ВАЖНО: НЕ ctx.revert() — он мгновенно сбрасывал opacity к 0,
     // убивая анимацию закрытия. kill() убивает таймлайны, но не откатывает стили.
     return () => {
-      // Защита: если timeline прерывается (kill) до завершения,
-      // пункты меню не должны оставаться невидимыми (opacity:0 от gsap.fromTo)
-      gsap.set(navRef.current?.children ?? [], { opacity: 1, y: 0, clearProps: 'opacity,transform' });
+      // Пункты меню управляются dust-анимацией в ParticleMenuItem (по menuOpen),
+      // здесь GSAP не трогает детей nav — просто kill таймлайна оверлея.
       ctx.kill();
     };
   }, [menuOpen]);
 
   const navLinks = [
     { label: "Услуги", href: "#services", animation: "wave" as const },
-    { label: "Портфолио", href: "#gallery", animation: "radial" as const },
-    { label: "Цены", href: "#pricing", animation: "fall" as const },
-    { label: "Отзывы", href: "#testimonials", animation: "whisper" as const },
-    { label: "Контакты", href: "#contact", animation: "burst" as const },
+    { label: "Портфолио", href: "#gallery", animation: "wave" as const },
+    { label: "Цены", href: "#pricing", animation: "wave" as const },
+    { label: "Отзывы", href: "#testimonials", animation: "wave" as const },
+    { label: "Контакты", href: "#contact", animation: "wave" as const },
   ];
 
   const closeMenu = () => setMenuOpen(false);
