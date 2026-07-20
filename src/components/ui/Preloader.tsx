@@ -6,9 +6,10 @@ interface PreloaderProps {
 
 export default function Preloader({ onComplete }: PreloaderProps) {
   const [progress, setProgress] = useState(0);
+  const [logoVisible, setLogoVisible] = useState(false);
   const startRef = useRef<number>(0);
-  const maxDuration = 2200; // максимум ~2.2s
-  const minDuration = 1200; // минимум показа, чтобы не мелькал на быстрых устройствах
+  const maxDuration = 2800; // ~2.8s — чуть дольше, современнее
+  const minDuration = 1800; // минимум показа
 
   useEffect(() => {
     let completed = false;
@@ -21,36 +22,35 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     startRef.current = performance.now();
     let intervalId: number;
 
-    // Прелоадер ВСЕГДА проигрывается заново при обновлении/монтаже
-    // (без мгновенного пропуска при reduce-motion — там даём короткую версию,
-    // чтобы анимация была заметна на всех устройствах, включая iPhone).
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const effectiveMax = reduceMotion ? 600 : maxDuration;
+    const effectiveMax = reduceMotion ? 720 : maxDuration;
+
+    // Лого проявляется плавно в первой трети загрузки (дыхание)
+    window.setTimeout(() => setLogoVisible(true), reduceMotion ? 60 : 250);
 
     intervalId = window.setInterval(() => {
       const now = performance.now();
       const elapsed = now - startRef.current;
       const raw = Math.min(elapsed / effectiveMax, 1);
-      const eased = 1 - Math.pow(1 - raw, 2.5);
+      const eased = 1 - Math.pow(1 - raw, 2.2);
       const pct = Math.round(eased * 100);
       setProgress(pct);
 
       if (raw >= 1 && elapsed >= Math.min(minDuration, effectiveMax)) {
         window.clearInterval(intervalId);
-        window.setTimeout(finish, 200);
+        window.setTimeout(finish, 220);
       }
     }, 16);
 
-    // Жёсткая страховка: никогда не висеть дольше effectiveMax + буфер
-    const hardStop = window.setTimeout(finish, effectiveMax + 600);
+    const hardStop = window.setTimeout(finish, effectiveMax + 700);
 
-    // bfcache (возврат назад/вперёд): перезапускаем при показе страницы
     const onPageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
-        // принудительный перезапуск — меняем start, чтобы анимация пошла снова
         startRef.current = performance.now();
         setProgress(0);
+        setLogoVisible(false);
         completed = false;
+        window.setTimeout(() => setLogoVisible(true), 250);
       }
     };
     window.addEventListener('pageshow', onPageShow);
@@ -62,53 +62,110 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     };
   }, [onComplete]);
 
+  const ringSize = 168;
+  const stroke = 2;
+  const r = (ringSize - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - progress / 100);
+
   return (
     <div
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: '#050505',
+        background:
+          'radial-gradient(circle at 50% 42%, rgba(40,32,12,0.55) 0%, #050505 62%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '2rem',
+        gap: '1.6rem',
+        overflow: 'hidden',
       }}
     >
-      {/* Logo */}
-      <h1
-        style={{
-          fontFamily: '"Playfair Display", serif',
-          fontSize: 'clamp(2rem, 5vw, 4rem)',
-          color: '#d4af37',
-          letterSpacing: '0.12em',
-          fontWeight: 400,
-        }}
-      >
-        ВЗГЛЯД
-      </h1>
-
-      {/* Gold progress line */}
+      {/* Золотая пыль — лёгкое свечение позади */}
       <div
         style={{
-          width: 'min(280px, 60vw)',
-          height: '1px',
-          background: 'rgba(212, 175, 55, 0.15)',
-          position: 'relative',
-          overflow: 'hidden',
+          position: 'absolute',
+          width: 320,
+          height: 320,
+          borderRadius: '50%',
+          background:
+            'radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%)',
+          filter: 'blur(8px)',
+          pointerEvents: 'none',
         }}
-      >
-        <div
+      />
+
+      {/* Кольцо-орбита + лого в центре */}
+      <div style={{ position: 'relative', width: ringSize, height: ringSize }}>
+        <svg
+          width={ringSize}
+          height={ringSize}
+          viewBox={`0 0 ${ringSize} ${ringSize}`}
+          style={{ transform: 'rotate(-90deg)' }}
+        >
+          {/* трек */}
+          <circle
+            cx={ringSize / 2}
+            cy={ringSize / 2}
+            r={r}
+            fill="none"
+            stroke="rgba(212,175,55,0.12)"
+            strokeWidth={stroke}
+          />
+          {/* рисующееся кольцо */}
+          <circle
+            cx={ringSize / 2}
+            cy={ringSize / 2}
+            r={r}
+            fill="none"
+            stroke="#d4af37"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+            style={{ transition: 'stroke-dashoffset 0.05s linear' }}
+          />
+        </svg>
+
+        {/* Лого по центру — мягкое дыхание */}
+        <h1
           style={{
             position: 'absolute',
             inset: 0,
-            background: '#d4af37',
-            transform: `scaleX(${progress / 100})`,
-            transformOrigin: 'left center',
-            transition: 'transform 0.08s linear',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: '"Playfair Display", serif',
+            fontSize: 'clamp(1.6rem, 6vw, 2.4rem)',
+            color: '#d4af37',
+            letterSpacing: '0.14em',
+            fontWeight: 400,
+            margin: 0,
+            opacity: logoVisible ? 1 : 0,
+            filter: logoVisible ? 'blur(0px)' : 'blur(10px)',
+            transform: logoVisible ? 'scale(1)' : 'scale(0.96)',
+            transition: 'opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease',
+            textShadow: '0 0 24px rgba(212,175,55,0.25)',
           }}
-        />
+        >
+          ВЗГЛЯД
+        </h1>
+      </div>
+
+      {/* Счётчик % */}
+      <div
+        style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '0.72rem',
+          letterSpacing: '0.25em',
+          color: 'rgba(212,175,55,0.7)',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {progress.toString().padStart(3, '0')}%
       </div>
     </div>
   );
