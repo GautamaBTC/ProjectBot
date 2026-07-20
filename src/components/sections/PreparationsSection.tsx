@@ -142,22 +142,28 @@ export default function PreparationsSection() {
             ))}
           </div>
 
-          {/* Финальный акцент — курсив, тонкий */}
+          {/* Финальный акцент — курсив, тонкий, опущен ниже с разделителем */}
           <Reveal delay={0.1}>
-            <p
-              className="mx-auto mt-16 max-w-3xl text-center"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: 'italic',
-                fontSize: 'clamp(1.05rem, 2vw, 1.45rem)',
-                fontWeight: 400,
-                color: 'var(--text-primary)',
-                lineHeight: 1.5,
-                opacity: 0.92,
-              }}
-            >
-              «Каждый препарат в нашей косметичке имеет свою задачу. Мы тестируем новинки 2026 года, чтобы предложить вам только то, что работает на 100%. Ваши брови и ресницы — не поле для экспериментов, а архитектура, где важна каждая деталь».
-            </p>
+            <div className="mx-auto mt-24 max-w-3xl">
+              <div
+                className="mx-auto mb-10 h-px w-24"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)' }}
+              />
+              <p
+                className="text-center"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontStyle: 'italic',
+                  fontSize: 'clamp(1.05rem, 2vw, 1.45rem)',
+                  fontWeight: 400,
+                  color: 'var(--text-primary)',
+                  lineHeight: 1.5,
+                  opacity: 0.92,
+                }}
+              >
+                «Каждый препарат в нашей косметичке имеет свою задачу. Мы тестируем новинки 2026 года, чтобы предложить вам только то, что работает на 100%. Ваши брови и ресницы — не поле для экспериментов, а архитектура, где важна каждая деталь».
+              </p>
+            </div>
           </Reveal>
         </div>
       </div>
