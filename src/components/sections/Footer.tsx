@@ -158,7 +158,7 @@ export default function Footer() {
                 textTransform: 'uppercase',
               }}
             >
-              Мы в соцсетях
+              Я в соцсетях
             </span>
             <div className="flex gap-5">
               {SOCIALS.map(({ key, label, href, icon }) => (
@@ -190,7 +190,7 @@ export default function Footer() {
                 maxWidth: '16rem',
               }}
             >
-              Запись на процедуры — в сообщениях.<br />Ответим в течение дня.
+              Запись на процедуры — в сообщениях.<br />Отвечу в течение 15 минут.
             </p>
           </div>
         </div>
