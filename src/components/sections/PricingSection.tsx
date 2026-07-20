@@ -107,13 +107,13 @@ export default function PricingSection() {
             <BreathText
               as="h2"
               text="Выберите свой формат"
-              className="mb-12"
               style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: 'clamp(2rem, 5vw, 3.4rem)',
                 fontWeight: 500,
                 color: 'var(--text-primary)',
                 lineHeight: 1.1,
+                marginBottom: '3.5rem',
               }}
             />
           </ScrollDirectionReveal>
