@@ -813,8 +813,8 @@ export default function App() {
     const video = videoRef.current;
     const mountTime = Date.now();
     const MIN_SHOW = 1500;
-    const TARGET = 3200; // за это время прогресс плавно доходит до 100%
-    const MAX_SHOW = 4500; // жёсткий предел
+    const TARGET = 2800; // за это время прогресс плавно доходит до 100%
+    const MAX_SHOW = 3500; // жёсткий предел
     let settled = false;
 
     const finish = () => {
