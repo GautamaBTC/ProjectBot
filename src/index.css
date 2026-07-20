@@ -671,7 +671,19 @@ body {
   }
 }
 
-/* ===== NO SCROLL ===== */
+/* ===== CLOSE (X) ICON — размер как бургер, стильный крест 45° ===== */
+.close-x {
+  width: 36px;
+  height: 36px;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+.close-x:hover {
+  transform: rotate(90deg);
+}
+.close-x.closing {
+  transform: rotate(135deg);
+  opacity: 0;
+}
 body.no-scroll {
   overflow: hidden;
   /* Prevent iOS bounce scroll leaking */

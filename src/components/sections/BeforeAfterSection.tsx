@@ -83,21 +83,18 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
       role="dialog"
       aria-modal="true"
     >
-      {/* Крестик-бургер: две полоски, как в меню; вращается при наведении.
-          При клике вращаем его и одновременно исчезает фото (через closing). */}
+      {/* Крестик: две полоски 45°/-45°, размер как бургер (36px).
+          Hover → плавно вращается на 90°. Закрытие → класс .closing (доворот + затухание). */}
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); doClose(); }}
         aria-label="Закрыть"
-        className="group absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full"
+        className="absolute top-5 right-5 w-11 h-11 flex items-center justify-center rounded-full"
         style={{ background: 'transparent', border: 'none', color: '#d4af37', cursor: 'pointer' }}
       >
-        <span
-          className="relative block transition-transform duration-300 ease-out group-hover:rotate-90"
-          style={{ width: '26px', height: '26px' }}
-        >
-          <span className="absolute left-1/2 top-1/2 h-[2px] w-6 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: '#d4af37' }} />
-          <span className="absolute left-1/2 top-1/2 h-[2px] w-6 -translate-x-1/2 -translate-y-1/2 rotate-90 rounded-full" style={{ background: '#d4af37' }} />
+        <span className={`close-x relative block ${closing ? 'closing' : ''}`}>
+          <span className="absolute left-1/2 top-1/2 h-[2px] w-9 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: '#d4af37', transform: 'rotate(45deg)' }} />
+          <span className="absolute left-1/2 top-1/2 h-[2px] w-9 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: '#d4af37', transform: 'rotate(-45deg)' }} />
         </span>
       </button>
 
