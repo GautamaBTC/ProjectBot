@@ -3,7 +3,7 @@ import { CONTACTS } from '../../lib/constants';
 import ScrollDirectionReveal from '../ScrollDirectionReveal';
 
 // Brand-иконки (премиальные, ровные контуры) — simple-icons
-import { siWhatsapp, siTelegram, siInstagram } from 'simple-icons';
+import { siWhatsapp, siTelegram, siInstagram, siMax } from 'simple-icons';
 
 const NAV_LINKS = [
   { label: 'Услуги', href: '#services' },
@@ -23,6 +23,7 @@ const SOCIALS = [
   { key: 'whatsapp', label: 'WhatsApp', href: `https://wa.me/${CONTACTS.whatsapp}`, icon: siWhatsapp },
   { key: 'telegram', label: 'Telegram', href: 'https://t.me/inna_egorushkina', icon: siTelegram },
   { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/inna.egorushkina', icon: siInstagram },
+  { key: 'max', label: 'MAX', href: 'https://max.ru', icon: siMax },
 ];
 
 const gold = '#d4af37';
