@@ -19,8 +19,28 @@ import work09 from '../../assets/portfolio/work-09.jpg';
 import work10 from '../../assets/portfolio/work-10.jpg';
 import work11 from '../../assets/portfolio/work-11.jpg';
 
-const WORKS = [work01, work02, work03, work04, work06, work07, work08, work09, work10, work11];
-const FEATURED = WORKS.slice(0, 4);
+// Все фото + их категория (распределено по типам работ)
+type Cat = 'brows' | 'lashes' | 'complex';
+const ALL: { src: string; cat: Cat }[] = [
+  { src: work01, cat: 'brows' },
+  { src: work02, cat: 'brows' },
+  { src: work03, cat: 'brows' },
+  { src: work06, cat: 'brows' },
+  { src: work07, cat: 'lashes' },
+  { src: work08, cat: 'lashes' },
+  { src: work09, cat: 'lashes' },
+  { src: work10, cat: 'lashes' },
+  { src: work04, cat: 'complex' },
+  { src: work11, cat: 'complex' },
+];
+const WORKS = ALL.map((w) => w.src);
+
+const FILTERS: { key: Cat | 'all'; label: string }[] = [
+  { key: 'all', label: 'Все' },
+  { key: 'brows', label: 'Брови' },
+  { key: 'lashes', label: 'Ресницы' },
+  { key: 'complex', label: 'Комплексы' },
+];
 
 function Carousel({ index, onClose }: { index: number | null; onClose: () => void }) {
   const imgRef = useRef<HTMLImageElement>(null);
@@ -30,13 +50,12 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
 
   useEffect(() => { if (index !== null) { setPos(index); setClosing(false); } }, [index]);
 
-  // блокируем скролл под оверлеем, НО без position:fixed (не сбрасываем к Hero)
   useEffect(() => {
     if (index === null) return;
     document.body.classList.add('gallery-lock');
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') doClose();
-      if (e.key === 'ArrowRight') setPos((p) => (p + 1) % WORKS.length);
+      if (e.key ===ArrowRight) setPos((p) => (p + 1) % WORKS.length);
       if (e.key === 'ArrowLeft') setPos((p) => (p - 1 + WORKS.length) % WORKS.length);
     };
     window.addEventListener('keydown', onKey);
@@ -44,7 +63,6 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  // анимация смены фото (появление)
   useEffect(() => {
     if (index === null || !imgRef.current) return;
     gsap.fromTo(imgRef.current, { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' });
@@ -52,8 +70,8 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
 
   const doClose = () => {
     if (closing) return;
-    setClosing(true); // запускает CSS-transition исчезновения (opacity 0)
-    window.setTimeout(onClose, 320); // после завершения transition — закрыть
+    setClosing(true);
+    window.setTimeout(onClose, 320);
   };
 
   const onDown = (e: React.PointerEvent) => { drag.current = { x: e.clientX, active: true }; (e.target as HTMLElement).setPointerCapture?.(e.pointerId); };
@@ -83,8 +101,6 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
       role="dialog"
       aria-modal="true"
     >
-      {/* Крестик: две полоски 45°/-45°, размер как бургер (36px).
-          Hover → плавно вращается на 90°. Закрытие → класс .closing (доворот + затухание). */}
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); doClose(); }}
@@ -123,7 +139,10 @@ function Carousel({ index, onClose }: { index: number | null; onClose: () => voi
 
 export default function BeforeAfterSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [filter, setFilter] = useState<Cat | 'all'>('all');
   const [carousel, setCarousel] = useState<number | null>(null);
+
+  const visible = filter === 'all' ? ALL : ALL.filter((w) => w.cat === filter);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -144,30 +163,66 @@ export default function BeforeAfterSection() {
           </span>
           <BreathText as="h2" text="Мои работы" className="mb-4" style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(2rem, 5vw, 3.4rem)', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.1 }} />
           <p className="max-w-xl" style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(0.9rem, 1.4vw, 1rem)', color: 'var(--text-secondary)', fontWeight: 300, lineHeight: 1.6 }}>
-            Брови и ресницы — каждая деталь имеет значение. Листайте галерею.
+            Результаты, в которые влюбляешься. До и после — без фильтров.
           </p>
         </ScrollDirectionReveal>
 
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {FEATURED.map((src, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setCarousel(i)}
-              className="pf-card group relative block overflow-hidden rounded-[16px] cursor-pointer"
-              style={{ aspectRatio: '1 / 1', border: '1px solid rgba(212,175,55,0.14)', boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)', transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease', padding: 0, background: '#0a0a0a' }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)'; e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)'; e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <img src={src} alt={`Моя работа ${i + 1}`} loading="lazy" className="w-full h-full object-cover block group-hover:scale-[1.04] transition-transform duration-700 ease-out" style={{ display: 'block' }} />
-            </button>
-          ))}
+        {/* Фильтр категорий */}
+        <div className="mt-8 flex flex-wrap justify-center gap-2 md:gap-3">
+          {FILTERS.map((f) => {
+            const activeF = filter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setFilter(f.key)}
+                className="px-4 py-2 rounded-full transition-all duration-300"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '0.8rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.15em',
+                  color: activeF ? '#0a0a0a' : 'rgba(212,175,55,0.8)',
+                  background: activeF ? 'linear-gradient(135deg, #d4af37, #f0d878)' : 'transparent',
+                  border: `1px solid ${activeF ? 'transparent' : 'rgba(212,175,55,0.35)'}`,
+                  fontWeight: activeF ? 600 : 400,
+                  cursor: 'pointer',
+                }}
+              >
+                {f.label}
+              </button>
+            );
+          })}
         </div>
 
-        <div style={{ marginTop: '4rem' }} className="flex justify-center">
-          <Button variant="gold" onClick={() => setCarousel(0)}>
-            Смотреть все работы
+        {/* Сетка 2x2 из отфильтрованных фото */}
+        <div className="mt-10 grid grid-cols-2 gap-3 md:gap-4 max-w-2xl mx-auto">
+          {visible.slice(0, 4).map((w, i) => {
+            const globalIdx = WORKS.indexOf(w.src);
+            return (
+              <button
+                key={w.src}
+                type="button"
+                onClick={() => setCarousel(globalIdx)}
+                className="pf-card group relative block overflow-hidden rounded-[16px] cursor-pointer"
+                style={{ aspectRatio: '1 / 1', border: '1px solid rgba(212,175,55,0.14)', boxShadow: '0 16px 50px -20px rgba(0,0,0,0.6)', transition: 'border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease', padding: 0, background: '#0a0a0a' }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)'; e.currentTarget.style.boxShadow = '0 24px 60px -20px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.12)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(212,175,55,0.14)'; e.currentTarget.style.boxShadow = '0 16px 50px -20px rgba(0,0,0,0.6)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <img src={w.src} alt="Моя работа" loading="lazy" className="w-full h-full object-cover block group-hover:scale-[1.04] transition-transform duration-700 ease-out" style={{ display: 'block' }} />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Кнопка + доверие */}
+        <div style={{ marginTop: '4rem' }} className="flex flex-col items-center">
+          <Button variant="gold" href="https://instagram.com/inna.egorushkina" target="_blank" rel="noopener noreferrer">
+            Все работы
           </Button>
+          <span className="mt-3" style={{ fontFamily: "'Inter', sans-serif", fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 300 }}>
+            Более 50 реализованных образов
+          </span>
         </div>
       </div>
 
