@@ -808,73 +808,57 @@ export default function App() {
     };
   }, []);
 
-  // Прелоадер ждёт загрузки видеофона. Готовность = видео реально стартовало
-  // (canplaythrough/playing, а не ранний loadeddata, который на Android срабатывает
-  // мгновенно при первом кадре) И прошло минимальное время показа.
+  // Прелоадер: ждём загрузки видеофона, но ГАРАНТИРУЕМ показ сайта
+  // (никогда не оставляем чёрный экран). Минимум 1.5с, максимум ~4с.
   useEffect(() => {
     const video = videoRef.current;
     const mountTime = Date.now();
-    const MIN_SHOW = 2500; // минимум показа, чтобы на быстром Android не моргнул
-    let videoStarted = false;
+    const MIN_SHOW = 1500;
+    const MAX_SHOW = 4000;
     let settled = false;
 
-    const tryFinish = () => {
-      if (settled || !videoStarted) return;
+    const finish = () => {
+      if (settled) return;
       settled = true;
       setProgress(100);
       const wait = Math.max(0, MIN_SHOW - (Date.now() - mountTime));
-      window.setTimeout(() => setIsLoaded(true), wait + 350);
+      window.setTimeout(() => setIsLoaded(true), wait + 300);
     };
 
-    const onStarted = () => { videoStarted = true; tryFinish(); };
-
+    // Плавный прогресс (пока нет реальных данных о буфере)
     let fake = 0;
     const fakeTimer = window.setInterval(() => {
       if (settled) return;
-      fake = Math.min(fake + 1.5, 90);
+      fake = Math.min(fake + 2, 92);
       setProgress((p) => Math.max(p, Math.round(fake)));
-    }, 60);
+    }, 50);
 
+    // Если видео реально стартовало — ничего не форсируем, просто слушаем буфер
+    const onStarted = () => {};
     if (video) {
-      // Уже играет/готово (редкий кейс, напр. из кэша с canplaythrough)
-      if (video.readyState >= 3 || !video.paused) {
-        onStarted();
-      }
-      // Ждём РЕАЛЬНОГО старта воспроизведения, а не первого кадра
-      video.addEventListener('canplaythrough', onStarted);
       video.addEventListener('playing', onStarted);
+      video.addEventListener('canplaythrough', onStarted);
       video.addEventListener('progress', () => {
         if (settled) return;
         try {
           const v = video as any;
           if (v.buffered && v.buffered.length && v.duration) {
             const end = v.buffered.end(v.buffered.length - 1);
-            const ratio = Math.min(end / v.duration, 0.95);
-            setProgress(Math.round(ratio * 100));
+            setProgress(Math.round(Math.min(end / v.duration, 0.98) * 100));
           }
         } catch { /* noop */ }
       });
-      // Если autoplay заблокирован — принудительно запускаем, чтобы playing сработал
-      const tryPlay = () => { video.play().catch(() => {}); };
-      tryPlay();
-      video.addEventListener('canplay', tryPlay);
-    } else {
-      window.setTimeout(() => {
-        const v2 = videoRef.current;
-        if (v2 && (v2.readyState >= 3 || !v2.paused)) onStarted();
-      }, 300);
     }
 
-    // Страховка: если видео не стартует (офлайн/блок) — не вешать вечно
-    const safety = window.setTimeout(() => { videoStarted = true; tryFinish(); }, 8000);
+    // ЖЁСТКАЯ страховка — сайт ВСЕГДА показывается (даже если видео не загрузилось)
+    const safety = window.setTimeout(finish, MAX_SHOW);
 
     return () => {
       window.clearInterval(fakeTimer);
       window.clearTimeout(safety);
       if (video) {
-        video.removeEventListener('canplaythrough', onStarted);
         video.removeEventListener('playing', onStarted);
-        video.removeEventListener('canplay', tryPlay);
+        video.removeEventListener('canplaythrough', onStarted);
       }
     };
   }, []);
