@@ -433,7 +433,7 @@ function HeroSection({ start }: { start: boolean }) {
                 letterSpacing: '0.02em',
               }}
             >
-              Доверяют нам — на основе отзывов клиентов
+              Доверяют мне — на основе отзывов моих клиентов
             </span>
           </div>
         </div>
