@@ -11,13 +11,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const minDuration = 1200; // минимум показа, чтобы не мелькал на быстрых устройствах
 
   useEffect(() => {
-    // Check reduced motion
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mq.matches) {
-      onComplete();
-      return;
-    }
-
     let completed = false;
     const finish = () => {
       if (completed) return;
@@ -28,30 +21,44 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     startRef.current = performance.now();
     let intervalId: number;
 
-    // Используем setInterval вместо requestAnimationFrame:
-    // RAF на iOS (Safari) не тикает, когда вкладка в фоне / при throttle,
-    // из-за чего прелоадер мог "висеть" на iPhone. setInterval надёжнее на всех платформах.
+    // Прелоадер ВСЕГДА проигрывается заново при обновлении/монтаже
+    // (без мгновенного пропуска при reduce-motion — там даём короткую версию,
+    // чтобы анимация была заметна на всех устройствах, включая iPhone).
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const effectiveMax = reduceMotion ? 600 : maxDuration;
+
     intervalId = window.setInterval(() => {
       const now = performance.now();
       const elapsed = now - startRef.current;
-      const raw = Math.min(elapsed / maxDuration, 1);
+      const raw = Math.min(elapsed / effectiveMax, 1);
       const eased = 1 - Math.pow(1 - raw, 2.5);
       const pct = Math.round(eased * 100);
       setProgress(pct);
 
-      if (raw >= 1 && elapsed >= minDuration) {
+      if (raw >= 1 && elapsed >= Math.min(minDuration, effectiveMax)) {
         window.clearInterval(intervalId);
-        // Короткая пауза на 100% перед скрытием
         window.setTimeout(finish, 200);
       }
     }, 16);
 
-    // Жёсткая страховка: никогда не висеть дольше maxDuration + буфер
-    const hardStop = window.setTimeout(finish, maxDuration + 600);
+    // Жёсткая страховка: никогда не висеть дольше effectiveMax + буфер
+    const hardStop = window.setTimeout(finish, effectiveMax + 600);
+
+    // bfcache (возврат назад/вперёд): перезапускаем при показе страницы
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // принудительный перезапуск — меняем start, чтобы анимация пошла снова
+        startRef.current = performance.now();
+        setProgress(0);
+        completed = false;
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
 
     return () => {
       window.clearInterval(intervalId);
       window.clearTimeout(hardStop);
+      window.removeEventListener('pageshow', onPageShow);
     };
   }, [onComplete]);
 
