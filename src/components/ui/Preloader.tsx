@@ -8,8 +8,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [progress, setProgress] = useState(0);
   const [logoVisible, setLogoVisible] = useState(false);
   const startRef = useRef<number>(0);
-  const maxDuration = 2800; // ~2.8s — чуть дольше, современнее
-  const minDuration = 1800; // минимум показа
+  const maxDuration = 4000; // ~4s — чтобы всё на сайте точно загрузилось
+  const minDuration = 2600; // минимум показа
 
   useEffect(() => {
     let completed = false;
