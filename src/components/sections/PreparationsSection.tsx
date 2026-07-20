@@ -144,9 +144,9 @@ export default function PreparationsSection() {
 
           {/* Финальный акцент — курсив, тонкий, опущен ниже с разделителем */}
           <Reveal delay={0.1}>
-            <div className="flex flex-col items-center" style={{ marginTop: '8rem', paddingTop: '2rem' }}>
+            <div className="flex flex-col items-center" style={{ marginTop: '4rem', paddingTop: '1rem' }}>
               <div
-                className="mb-12 h-px w-24"
+                className="mb-6 h-px w-24"
                 style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)' }}
               />
               <p
