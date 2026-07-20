@@ -808,13 +808,13 @@ export default function App() {
     };
   }, []);
 
-  // Прелоадер: ждём загрузки видеофона, но ГАРАНТИРУЕМ показ сайта
-  // (никогда не оставляем чёрный экран). Минимум 1.5с, максимум ~4с.
+  // Прелоадер: плавный прогресс по времени до 100%, ГАРАНТИРОВАННЫЙ показ сайта.
   useEffect(() => {
     const video = videoRef.current;
     const mountTime = Date.now();
     const MIN_SHOW = 1500;
-    const MAX_SHOW = 4000;
+    const TARGET = 3200; // за это время прогресс плавно доходит до 100%
+    const MAX_SHOW = 4500; // жёсткий предел
     let settled = false;
 
     const finish = () => {
@@ -825,41 +825,36 @@ export default function App() {
       window.setTimeout(() => setIsLoaded(true), wait + 300);
     };
 
-    // Плавный прогресс (пока нет реальных данных о буфере)
-    let fake = 0;
-    const fakeTimer = window.setInterval(() => {
+    // Плавный прогресс по времени (без резких скачков)
+    const tick = window.setInterval(() => {
       if (settled) return;
-      fake = Math.min(fake + 2, 92);
-      setProgress((p) => Math.max(p, Math.round(fake)));
-    }, 50);
+      const elapsed = Date.now() - mountTime;
+      const byTime = Math.min((elapsed / TARGET) * 100, 100);
+      setProgress((prev) => Math.round(Math.max(prev, byTime)));
+    }, 40);
 
-    // Если видео реально стартовало — ничего не форсируем, просто слушаем буфер
-    const onStarted = () => {};
+    // Реальный буфер видео может ускорить (но не создавать скачок)
     if (video) {
-      video.addEventListener('playing', onStarted);
-      video.addEventListener('canplaythrough', onStarted);
       video.addEventListener('progress', () => {
         if (settled) return;
         try {
           const v = video as any;
           if (v.buffered && v.buffered.length && v.duration) {
             const end = v.buffered.end(v.buffered.length - 1);
-            setProgress(Math.round(Math.min(end / v.duration, 0.98) * 100));
+            const ratio = Math.min(end / v.duration, 1) * 100;
+            setProgress((prev) => Math.round(Math.min(Math.max(prev, ratio), 99)));
           }
         } catch { /* noop */ }
       });
     }
 
-    // ЖЁСТКАЯ страховка — сайт ВСЕГДА показывается (даже если видео не загрузилось)
+    // ЖЁСТКАЯ страховка — сайт ВСЕГДА показывается
     const safety = window.setTimeout(finish, MAX_SHOW);
 
     return () => {
-      window.clearInterval(fakeTimer);
+      window.clearInterval(tick);
       window.clearTimeout(safety);
-      if (video) {
-        video.removeEventListener('playing', onStarted);
-        video.removeEventListener('canplaythrough', onStarted);
-      }
+      if (video) video.removeEventListener('progress', () => {});
     };
   }, []);
 
