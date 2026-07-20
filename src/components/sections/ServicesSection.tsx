@@ -62,7 +62,7 @@ export default function ServicesSection() {
                 fontWeight: 500,
                 color: 'var(--text-primary)',
                 lineHeight: 1.1,
-                marginBottom: '2.75rem',
+                marginBottom: '2.5rem',
               }}
             />
           </ScrollDirectionReveal>

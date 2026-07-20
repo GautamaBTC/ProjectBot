@@ -113,7 +113,7 @@ export default function PricingSection() {
                 fontWeight: 500,
                 color: 'var(--text-primary)',
                 lineHeight: 1.1,
-                marginBottom: '3.5rem',
+                marginBottom: '2.5rem',
               }}
             />
           </ScrollDirectionReveal>

@@ -69,13 +69,13 @@ export default function PreparationsSection() {
               <BreathText
                 as="h2"
                 text="2026"
-                className="mb-4"
                 style={{
                   fontFamily: "'Playfair Display', serif",
                   fontSize: 'clamp(2.6rem, 7vw, 4.6rem)',
                   fontWeight: 500,
                   color: 'var(--text-primary)',
                   lineHeight: 1.05,
+                  marginBottom: '2.5rem',
                 }}
               />
               <p
