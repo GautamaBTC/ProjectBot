@@ -144,13 +144,13 @@ export default function PreparationsSection() {
 
           {/* Финальный акцент — курсив, тонкий, опущен ниже с разделителем */}
           <Reveal delay={0.1}>
-            <div className="mx-auto mt-24 max-w-3xl">
+            <div className="flex flex-col items-center" style={{ marginTop: '8rem', paddingTop: '2rem' }}>
               <div
-                className="mx-auto mb-10 h-px w-24"
+                className="mb-12 h-px w-24"
                 style={{ background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)' }}
               />
               <p
-                className="text-center"
+                className="text-center max-w-3xl"
                 style={{
                   fontFamily: "'Playfair Display', serif",
                   fontStyle: 'italic',
