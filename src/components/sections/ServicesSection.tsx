@@ -129,9 +129,9 @@ export default function ServicesSection() {
                   </div>
 
                   <div
-                    className="service-divider mt-7 h-px w-full"
-                  style={{ background: 'linear-gradient(90deg, rgba(212,175,55,0.35), rgba(212,175,55,0.05) 70%, transparent)' }}
-                />
+                                      className="service-divider mt-7 h-px w-full"
+                                      style={{ background: 'linear-gradient(90deg, rgba(212,175,55,0.35), rgba(212,175,55,0.05) 70%, transparent)' }}
+                                    />
                 </div>
                 </ScrollDirectionReveal>
               </li>
